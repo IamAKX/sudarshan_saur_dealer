@@ -9,9 +9,11 @@ class BusinessDetails extends StatefulWidget {
   const BusinessDetails(
       {super.key,
       required this.businessNameCtrl,
-      required this.businessAddressCtrl});
+      required this.businessAddressCtrl,
+      required this.gstNumberCtrl});
   final TextEditingController businessNameCtrl;
   final TextEditingController businessAddressCtrl;
+  final TextEditingController gstNumberCtrl;
 
   @override
   State<BusinessDetails> createState() => _BusinessDetailsState();
@@ -38,6 +40,13 @@ class _BusinessDetailsState extends State<BusinessDetails> {
           icon: LineAwesomeIcons.address_card,
         ),
         verticalGap(defaultPadding * 1.5),
+        InputFieldDark(
+          hint: 'GST Number',
+          controller: widget.gstNumberCtrl,
+          keyboardType: TextInputType.text,
+          obscure: false,
+          icon: LineAwesomeIcons.store,
+        ),
       ],
     );
   }

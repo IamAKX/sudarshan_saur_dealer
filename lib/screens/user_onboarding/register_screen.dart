@@ -24,6 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _otpCodeCtrl = TextEditingController();
   final TextEditingController _businessNameCtrl = TextEditingController();
   final TextEditingController _businessAddressCtrl = TextEditingController();
+  final TextEditingController _gstNumberCtrl = TextEditingController();
   int step = 1;
 
   @override
@@ -185,7 +186,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       case 2:
         return BusinessDetails(
             businessNameCtrl: _businessNameCtrl,
-            businessAddressCtrl: _businessAddressCtrl);
+            businessAddressCtrl: _businessAddressCtrl,
+            gstNumberCtrl: _gstNumberCtrl,);
       case 3:
         return OtpVerification(
           phoneCtrl: _phoneCtrl,

@@ -24,6 +24,9 @@ class NewRequestScreen extends StatefulWidget {
 
 class _NewRequestScreenState extends State<NewRequestScreen> {
   final TextEditingController _phoneCtrl = TextEditingController();
+  final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _emailCtrl = TextEditingController();
+  final TextEditingController _addressCtrl = TextEditingController();
   final TextEditingController _otpCtrl = TextEditingController();
   final TextEditingController _serialNumberCtrl = TextEditingController();
 
@@ -78,6 +81,30 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
           keyboardType: TextInputType.phone,
           obscure: false,
           icon: LineAwesomeIcons.phone,
+        ),
+        verticalGap(defaultPadding / 2),
+        InputFieldLight(
+          hint: 'Full Name',
+          controller: _nameCtrl,
+          keyboardType: TextInputType.name,
+          obscure: false,
+          icon: LineAwesomeIcons.user,
+        ),
+        verticalGap(defaultPadding / 2),
+        InputFieldLight(
+          hint: 'Email',
+          controller: _emailCtrl,
+          keyboardType: TextInputType.emailAddress,
+          obscure: false,
+          icon: LineAwesomeIcons.at,
+        ),
+        verticalGap(defaultPadding / 2),
+        InputFieldLight(
+          hint: 'Address',
+          controller: _addressCtrl,
+          keyboardType: TextInputType.streetAddress,
+          obscure: false,
+          icon: LineAwesomeIcons.home,
         ),
         verticalGap(defaultPadding / 2),
         Align(
