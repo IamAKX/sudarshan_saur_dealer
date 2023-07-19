@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:saur_dealer/screens/profile/edit_address.dart';
 import 'package:saur_dealer/screens/profile/edit_name.dart';
 import 'package:saur_dealer/screens/profile/edit_phone_number.dart';
 import 'package:saur_dealer/utils/colors.dart';
@@ -18,7 +19,7 @@ class _EditProfileState extends State<EditProfile>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -42,7 +43,8 @@ class _EditProfileState extends State<EditProfile>
           indicatorColor: primaryColor,
           tabs: const [
             Tab(text: 'Phone'),
-            Tab(text: 'Name & Address'),
+            Tab(text: 'Personal Detail'),
+            Tab(text: 'Address'),
           ],
         ),
       ),
@@ -51,6 +53,7 @@ class _EditProfileState extends State<EditProfile>
         children: const [
           EditPhoneNumber(),
           EditName(),
+          EditAddress(),
         ],
       ),
     );

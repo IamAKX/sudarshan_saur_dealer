@@ -7,6 +7,7 @@ import 'package:saur_dealer/widgets/gaps.dart';
 import 'package:saur_dealer/widgets/primary_button.dart';
 
 import '../../utils/colors.dart';
+import 'address_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -25,6 +26,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _businessNameCtrl = TextEditingController();
   final TextEditingController _businessAddressCtrl = TextEditingController();
   final TextEditingController _gstNumberCtrl = TextEditingController();
+  final TextEditingController addressLine1Ctrl = TextEditingController();
+  final TextEditingController addressLine2Ctrl = TextEditingController();
+  final TextEditingController cityCtrl = TextEditingController();
+  final TextEditingController stateCtrl = TextEditingController();
+  final TextEditingController zipCodeCtrl = TextEditingController();
   int step = 1;
 
   @override
@@ -92,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                         ),
                         Text(
-                          '/3',
+                          '/4',
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
@@ -137,7 +143,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const Spacer(),
                 Visibility(
-                  visible: step < 3,
+                  visible: step < 4,
                   child: InkWell(
                     onTap: () {
                       setState(() {
@@ -154,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 Visibility(
-                  visible: step == 3,
+                  visible: step == 4,
                   child: SizedBox(
                     width: 250,
                     child: PrimaryButton(
@@ -183,12 +189,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
             passwordCtrl: _passwordCtrl,
             phoneCtrl: _phoneCtrl,
             nameCtrl: _nameCtrl);
-      case 2:
-        return BusinessDetails(
-            businessNameCtrl: _businessNameCtrl,
-            businessAddressCtrl: _businessAddressCtrl,
-            gstNumberCtrl: _gstNumberCtrl,);
       case 3:
+        return BusinessDetails(
+          businessNameCtrl: _businessNameCtrl,
+          businessAddressCtrl: _businessAddressCtrl,
+          gstNumberCtrl: _gstNumberCtrl,
+        );
+      case 2:
+        return AddressScreen(
+          addressLine1Ctrl: addressLine1Ctrl,
+          addressLine2Ctrl: addressLine2Ctrl,
+          cityCtrl: cityCtrl,
+          stateCtrl: stateCtrl,
+          zipCodeCtrl: zipCodeCtrl,
+        );
+      case 4:
         return OtpVerification(
           phoneCtrl: _phoneCtrl,
           otpCode: '1234',
