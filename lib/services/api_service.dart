@@ -4,8 +4,8 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:saur_dealer/model/list_model/dealer_list_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
 import '../model/user_model.dart';
 import '../utils/api.dart';
 import '../utils/enum.dart';
@@ -18,7 +18,6 @@ class ApiProvider extends ChangeNotifier {
   ApiStatus? status = ApiStatus.ideal;
   late Dio _dio;
   static ApiProvider instance = ApiProvider();
-  late SharedPreferences prefs;
   ApiProvider() {
     _dio = Dio();
   }
@@ -27,9 +26,31 @@ class ApiProvider extends ChangeNotifier {
     status = ApiStatus.loading;
     notifyListeners();
     try {
+      Map<String, dynamic> requestBody = {
+        "dealerName": user.dealerName,
+        "password": user.password,
+        "mobileNo": user.mobileNo,
+        "status": user.status,
+        "email": user.email,
+        "address": {
+          "addressLine1": user.address?.addressLine1,
+          "addressLine2": user.address?.addressLine2,
+          "city": user.address?.city,
+          "state": user.address?.state,
+          "country": "India",
+          "zipCode": user.address?.zipCode
+        },
+        "image": user.image,
+        "lastLogin": user.lastLogin,
+        "businessName": user.businessName,
+        "businessAddress": user.businessAddress,
+        "gstNumber": user.gstNumber
+      };
+
+      log('request : ${json.encode(requestBody)}');
       Response response = await _dio.post(
         Api.users,
-        data: json.encode(user.toMap()),
+        data: json.encode(requestBody),
         options: Options(
           contentType: 'application/json',
           responseType: ResponseType.json,
@@ -37,7 +58,7 @@ class ApiProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         UserModel user = UserModel.fromMap(response.data['data']);
-        prefs.setInt(SharedpreferenceKey.userId, user.id ?? 0);
+        prefs.setInt(SharedpreferenceKey.userId, user.dealerId ?? 0);
         if (user.status == UserStatus.ACTIVE.name) {
           status = ApiStatus.success;
           notifyListeners();
@@ -70,6 +91,7 @@ class ApiProvider extends ChangeNotifier {
     notifyListeners();
     try {
       Map<String, dynamic> map = {'email': email, 'password': password};
+      log('Request : ${json.encode(map)}');
       Response response = await _dio.post(
         Api.login,
         data: json.encode(map),
@@ -80,15 +102,18 @@ class ApiProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         UserModel user = UserModel.fromMap(response.data['data']);
-        prefs.setInt(SharedpreferenceKey.userId, user.id ?? 0);
+        prefs.setInt(SharedpreferenceKey.userId, user.dealerId ?? 0);
         if (user.status == UserStatus.ACTIVE.name) {
           status = ApiStatus.success;
           notifyListeners();
+          return true;
         } else {
           status = ApiStatus.failed;
           notifyListeners();
+          SnackBarService.instance.showSnackBarError(
+              'You profile is inactive. Please contact admin or wait for 24 hours.');
+          return false;
         }
-        return true;
       }
     } on DioException catch (e) {
       status = ApiStatus.failed;
@@ -108,12 +133,12 @@ class ApiProvider extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> updateUser(Map<String, dynamic> user) async {
+  Future<bool> updateUser(Map<String, dynamic> user, int id) async {
     status = ApiStatus.loading;
     notifyListeners();
     try {
       Response response = await _dio.put(
-        Api.users,
+        '${Api.users}/$id',
         data: json.encode(user),
         options: Options(
           contentType: 'application/json',
@@ -122,7 +147,7 @@ class ApiProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         UserModel user = UserModel.fromMap(response.data['data']);
-        prefs.setInt(SharedpreferenceKey.userId, user.id ?? 0);
+        prefs.setInt(SharedpreferenceKey.userId, user.dealerId ?? 0);
         status = ApiStatus.success;
         notifyListeners();
         return true;
@@ -145,7 +170,7 @@ class ApiProvider extends ChangeNotifier {
     return false;
   }
 
-  Future<UserModel?> getCustomerById(int id) async {
+  Future<UserModel?> getDealerById(int id) async {
     status = ApiStatus.loading;
     notifyListeners();
     UserModel? userModel;
@@ -181,7 +206,7 @@ class ApiProvider extends ChangeNotifier {
     return userModel;
   }
 
-  Future<DealerListModel?> getAllCustomer(int id) async {
+  Future<DealerListModel?> getAllDealer(int id) async {
     status = ApiStatus.loading;
     notifyListeners();
     DealerListModel? list;

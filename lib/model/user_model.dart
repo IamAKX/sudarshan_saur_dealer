@@ -2,10 +2,9 @@ import 'dart:convert';
 
 import 'address_model.dart';
 
-
 class UserModel {
-  int? id;
-  String? customerName;
+  int? dealerId;
+  String? dealerName;
   String? password;
   String? mobileNo;
   String? status;
@@ -13,10 +12,14 @@ class UserModel {
   AddressModel? address;
   String? image;
   String? lastLogin;
-  String? lastPurchaseDate;
+  String? businessName;
+  String? businessAddress;
+  String? gstNumber;
+  String? updatedOn;
+  String? createdOn;
   UserModel({
-    this.id,
-    this.customerName,
+    this.dealerId,
+    this.dealerName,
     this.password,
     this.mobileNo,
     this.status,
@@ -24,12 +27,16 @@ class UserModel {
     this.address,
     this.image,
     this.lastLogin,
-    this.lastPurchaseDate,
+    this.businessName,
+    this.businessAddress,
+    this.gstNumber,
+    this.updatedOn,
+    this.createdOn,
   });
 
   UserModel copyWith({
-    int? id,
-    String? customerName,
+    int? dealerId,
+    String? dealerName,
     String? password,
     String? mobileNo,
     String? status,
@@ -37,11 +44,15 @@ class UserModel {
     AddressModel? address,
     String? image,
     String? lastLogin,
-    String? lastPurchaseDate,
+    String? businessName,
+    String? businessAddress,
+    String? gstNumber,
+    String? updatedOn,
+    String? createdOn,
   }) {
     return UserModel(
-      id: id ?? this.id,
-      customerName: customerName ?? this.customerName,
+      dealerId: dealerId ?? this.dealerId,
+      dealerName: dealerName ?? this.dealerName,
       password: password ?? this.password,
       mobileNo: mobileNo ?? this.mobileNo,
       status: status ?? this.status,
@@ -49,14 +60,18 @@ class UserModel {
       address: address ?? this.address,
       image: image ?? this.image,
       lastLogin: lastLogin ?? this.lastLogin,
-      lastPurchaseDate: lastPurchaseDate ?? this.lastPurchaseDate,
+      businessName: businessName ?? this.businessName,
+      businessAddress: businessAddress ?? this.businessAddress,
+      gstNumber: gstNumber ?? this.gstNumber,
+      updatedOn: updatedOn ?? this.updatedOn,
+      createdOn: createdOn ?? this.createdOn,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'customerName': customerName,
+      'dealerId': dealerId,
+      'dealerName': dealerName,
       'password': password,
       'mobileNo': mobileNo,
       'status': status,
@@ -64,14 +79,18 @@ class UserModel {
       'address': address?.toMap(),
       'image': image,
       'lastLogin': lastLogin,
-      'lastPurchaseDate': lastPurchaseDate,
+      'businessName': businessName,
+      'businessAddress': businessAddress,
+      'gstNumber': gstNumber,
+      'updatedOn': updatedOn,
+      'createdOn': createdOn,
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id']?.toInt(),
-      customerName: map['customerName'],
+      dealerId: map['dealerId']?.toInt(),
+      dealerName: map['dealerName'],
       password: map['password'],
       mobileNo: map['mobileNo'],
       status: map['status'],
@@ -80,7 +99,11 @@ class UserModel {
           map['address'] != null ? AddressModel.fromMap(map['address']) : null,
       image: map['image'],
       lastLogin: map['lastLogin'],
-      lastPurchaseDate: map['lastPurchaseDate'],
+      businessName: map['businessName'],
+      businessAddress: map['businessAddress'],
+      gstNumber: map['gstNumber'],
+      updatedOn: map['updatedOn'],
+      createdOn: map['createdOn'],
     );
   }
 
@@ -91,7 +114,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, customerName: $customerName, password: $password, mobileNo: $mobileNo, status: $status, email: $email, address: $address, image: $image, lastLogin: $lastLogin, lastPurchaseDate: $lastPurchaseDate)';
+    return 'UserModel(dealerId: $dealerId, dealerName: $dealerName, password: $password, mobileNo: $mobileNo, status: $status, email: $email, address: $address, image: $image, lastLogin: $lastLogin, businessName: $businessName, businessAddress: $businessAddress, gstNumber: $gstNumber, updatedOn: $updatedOn, createdOn: $createdOn)';
   }
 
   @override
@@ -99,8 +122,8 @@ class UserModel {
     if (identical(this, other)) return true;
 
     return other is UserModel &&
-        other.id == id &&
-        other.customerName == customerName &&
+        other.dealerId == dealerId &&
+        other.dealerName == dealerName &&
         other.password == password &&
         other.mobileNo == mobileNo &&
         other.status == status &&
@@ -108,13 +131,17 @@ class UserModel {
         other.address == address &&
         other.image == image &&
         other.lastLogin == lastLogin &&
-        other.lastPurchaseDate == lastPurchaseDate;
+        other.businessName == businessName &&
+        other.businessAddress == businessAddress &&
+        other.gstNumber == gstNumber &&
+        other.updatedOn == updatedOn &&
+        other.createdOn == createdOn;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        customerName.hashCode ^
+    return dealerId.hashCode ^
+        dealerName.hashCode ^
         password.hashCode ^
         mobileNo.hashCode ^
         status.hashCode ^
@@ -122,6 +149,10 @@ class UserModel {
         address.hashCode ^
         image.hashCode ^
         lastLogin.hashCode ^
-        lastPurchaseDate.hashCode;
+        businessName.hashCode ^
+        businessAddress.hashCode ^
+        gstNumber.hashCode ^
+        updatedOn.hashCode ^
+        createdOn.hashCode;
   }
 }

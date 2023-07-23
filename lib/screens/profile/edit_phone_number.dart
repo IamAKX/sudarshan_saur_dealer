@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -5,12 +7,19 @@ import 'package:flutter/material.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
+import 'package:provider/provider.dart';
 import 'package:saur_dealer/utils/colors.dart';
 import 'package:saur_dealer/utils/theme.dart';
 import 'package:saur_dealer/widgets/alert_popup.dart';
 import 'package:saur_dealer/widgets/gaps.dart';
 import 'package:saur_dealer/widgets/input_field_light.dart';
 import 'package:saur_dealer/widgets/primary_button_dark.dart';
+
+import '../../main.dart';
+import '../../model/user_model.dart';
+import '../../services/api_service.dart';
+import '../../services/snakbar_service.dart';
+import '../../utils/preference_key.dart';
 
 class EditPhoneNumber extends StatefulWidget {
   const EditPhoneNumber({super.key});
@@ -28,6 +37,28 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
   int _secondsRemaining = otpResendThreshold;
   bool _timerActive = false;
   bool _isValidateButtonActive = true;
+
+  late ApiProvider _api;
+  UserModel? user;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => reloadScreen(),
+    );
+  }
+
+  reloadScreen() async {
+    await _api
+        .getDealerById(prefs.getInt(SharedpreferenceKey.userId) ?? -1)
+        .then((value) {
+      setState(() {
+        user = value;
+        _phoneNumberCtrl.text = user?.mobileNo ?? '';
+      });
+    });
+  }
 
   void startTimer() {
     _secondsRemaining = otpResendThreshold;
@@ -52,6 +83,8 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
 
   @override
   Widget build(BuildContext context) {
+    SnackBarService.instance.buildContext = context;
+    _api = Provider.of<ApiProvider>(context);
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(defaultPadding),
@@ -114,13 +147,26 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
           ),
           verticalGap(defaultPadding * 2),
           PrimaryButtonDark(
-            onPressed: () {
-              showPopup(context, DialogType.success, 'Success',
-                  'Your phone number is updated');
+            onPressed: () async {
+              if (_phoneNumberCtrl.text.isEmpty) {
+                SnackBarService.instance
+                    .showSnackBarError('All fields are mandatory');
+                return;
+              }
+
+              Map<String, dynamic> map = {"mobileNo": _phoneNumberCtrl.text};
+              _api.updateUser(map, user?.dealerId ?? -1).then((value) async {
+                if (value) {
+                  await reloadScreen();
+                  showPopup(context, DialogType.success, 'Success',
+                      'Your phone number is updated');
+                }
+              });
             },
             label: 'Validate and Update',
-            isDisabled: _isValidateButtonActive,
-            isLoading: false,
+            isDisabled:
+                _isValidateButtonActive || _api.status == ApiStatus.loading,
+            isLoading: _api.status == ApiStatus.loading,
           )
         ],
       ),

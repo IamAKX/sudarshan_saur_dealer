@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:saur_dealer/screens/blocked_user/blocked_users_screen.dart';
 import 'package:saur_dealer/screens/request/new_request_sreen.dart';
 
 import '../screens/app_intro/app_intro_screen.dart';
@@ -35,6 +36,8 @@ class NavRoute {
         return MaterialPageRoute(builder: (_) => const ChangePassword());
       case WarrentyScreen.routePath:
         return MaterialPageRoute(builder: (_) => const WarrentyScreen());
+      case BlockedUserScreen.routePath:
+        return MaterialPageRoute(builder: (_) => const BlockedUserScreen());
 
       default:
         return errorRoute();
