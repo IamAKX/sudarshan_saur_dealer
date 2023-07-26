@@ -3,9 +3,11 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saur_dealer/model/list_model/customer_list_model.dart';
 import 'package:saur_dealer/model/list_model/dealer_list_model.dart';
 
 import '../main.dart';
+import '../model/list_model/warranty_request_list.dart';
 import '../model/user_model.dart';
 import '../utils/api.dart';
 import '../utils/enum.dart';
@@ -193,8 +195,8 @@ class ApiProvider extends ChangeNotifier {
       var resBody = e.response?.data ?? {};
       log(e.response?.data.toString() ?? e.response.toString());
       notifyListeners();
-      SnackBarService.instance
-          .showSnackBarError('Error : ${resBody['message']}');
+      // SnackBarService.instance
+      //     .showSnackBarError('Error : ${resBody['message']}');
     } catch (e) {
       status = ApiStatus.failed;
       notifyListeners();
@@ -240,5 +242,110 @@ class ApiProvider extends ChangeNotifier {
     status = ApiStatus.failed;
     notifyListeners();
     return list;
+  }
+
+  Future<WarrantyRequestList?> getWarrantyRequestListByCustomerId(
+      int id) async {
+    status = ApiStatus.loading;
+    notifyListeners();
+    WarrantyRequestList? list;
+    try {
+      Response response = await _dio.get(
+        Api.requestWarranty,
+        options: Options(
+          contentType: 'application/json',
+          responseType: ResponseType.json,
+        ),
+      );
+      if (response.statusCode == 200) {
+        list = WarrantyRequestList.fromMap(response.data);
+        status = ApiStatus.success;
+        notifyListeners();
+      }
+    } on DioException catch (e) {
+      status = ApiStatus.failed;
+      var resBody = e.response?.data ?? {};
+      log(e.response?.data.toString() ?? e.response.toString());
+      notifyListeners();
+      SnackBarService.instance
+          .showSnackBarError('Error : ${resBody['message']}');
+    } catch (e) {
+      status = ApiStatus.failed;
+      notifyListeners();
+      SnackBarService.instance.showSnackBarError(e.toString());
+      log(e.toString());
+    }
+    status = ApiStatus.failed;
+    notifyListeners();
+    return list;
+  }
+
+  Future<bool> createNewWarrantyRequest(Map<String, dynamic> reqBody) async {
+    status = ApiStatus.loading;
+    notifyListeners();
+    try {
+      Response response = await _dio.post(
+        Api.requestWarranty,
+        data: json.encode(reqBody),
+        options: Options(
+          contentType: 'application/json',
+          responseType: ResponseType.json,
+        ),
+      );
+      if (response.statusCode == 200) {
+        status = ApiStatus.success;
+        notifyListeners();
+        return true;
+      }
+    } on DioException catch (e) {
+      status = ApiStatus.failed;
+      // var resBody = e.response?.data ?? {};
+      log(e.response?.data.toString() ?? e.response.toString());
+      notifyListeners();
+      SnackBarService.instance
+          .showSnackBarError('Error : Invalid serial number');
+    } catch (e) {
+      status = ApiStatus.failed;
+      notifyListeners();
+      SnackBarService.instance.showSnackBarError(e.toString());
+      log(e.toString());
+    }
+    status = ApiStatus.failed;
+    notifyListeners();
+    return false;
+  }
+
+  Future<CustomerListModel?> getCustomerByPhone(String phone) async {
+    status = ApiStatus.loading;
+    notifyListeners();
+    CustomerListModel? userModel;
+    try {
+      Response response = await _dio.get(
+        '${Api.customers}/?mobileNo=$phone',
+        options: Options(
+          contentType: 'application/json',
+          responseType: ResponseType.json,
+        ),
+      );
+      if (response.statusCode == 200) {
+        userModel = CustomerListModel.fromMap(response.data);
+        status = ApiStatus.success;
+        notifyListeners();
+        return userModel;
+      }
+    } on DioException catch (e) {
+      status = ApiStatus.failed;
+      var resBody = e.response?.data ?? {};
+      log(e.response?.data.toString() ?? e.response.toString());
+      notifyListeners();
+    } catch (e) {
+      status = ApiStatus.failed;
+      notifyListeners();
+
+      log(e.toString());
+    }
+    status = ApiStatus.failed;
+    notifyListeners();
+    return userModel;
   }
 }

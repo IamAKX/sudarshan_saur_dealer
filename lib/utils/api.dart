@@ -4,4 +4,6 @@ class Api {
 
   static const String users = '$baseUrl/saur/dealers';
   static const String login = '$baseUrl/saur/dealers/authenticate';
+  static const String requestWarranty = '$baseUrl/saur/warrantyRequests';
+  static const String customers = '$baseUrl/saur/customers';
 }

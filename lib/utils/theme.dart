@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -16,7 +15,8 @@ ThemeData globalTheme(BuildContext context) {
     useMaterial3: false,
     scaffoldBackgroundColor: background,
     colorScheme: ColorScheme.fromSwatch().copyWith(
-      background: background, // Your accent color
+      background: background, //
+      secondary: primaryColor,
     ),
     primarySwatch: Colors.indigo,
     dividerColor: dividerColor,

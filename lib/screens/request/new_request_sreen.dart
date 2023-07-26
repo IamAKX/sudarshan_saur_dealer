@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
@@ -6,12 +7,20 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
+import 'package:provider/provider.dart';
+import 'package:saur_dealer/model/list_model/customer_list_model.dart';
+import 'package:saur_dealer/screens/request/add_address_screen.dart';
 import 'package:saur_dealer/utils/theme.dart';
 import 'package:saur_dealer/widgets/gaps.dart';
 import 'package:saur_dealer/widgets/input_field_light.dart';
 import 'package:saur_dealer/widgets/primary_button_dark.dart';
+import 'package:string_validator/string_validator.dart';
 
+import '../../main.dart';
+import '../../services/api_service.dart';
+import '../../services/snakbar_service.dart';
 import '../../utils/colors.dart';
+import '../../utils/preference_key.dart';
 import '../../widgets/alert_popup.dart';
 
 class NewRequestScreen extends StatefulWidget {
@@ -29,6 +38,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   final TextEditingController _addressCtrl = TextEditingController();
   final TextEditingController _otpCtrl = TextEditingController();
   final TextEditingController _serialNumberCtrl = TextEditingController();
+  final TextEditingController addressLine1Ctrl = TextEditingController();
+  final TextEditingController addressLine2Ctrl = TextEditingController();
+  final TextEditingController cityCtrl = TextEditingController();
+  final TextEditingController stateCtrl = TextEditingController();
+  final TextEditingController zipCodeCtrl = TextEditingController();
 
   Timer? _timer;
   static const int otpResendThreshold = 10;
@@ -36,6 +50,35 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   bool _timerActive = false;
   bool _showOTPField = false;
   bool _isOtpValidated = false;
+
+  late ApiProvider _api;
+  CustomerListModel? customerList;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _phoneCtrl.addListener(() {
+      if (_phoneCtrl.text.isNotEmpty) {
+        _api.getCustomerByPhone(_phoneCtrl.text).then((value) {
+          log(value.toString());
+          customerList = value;
+          _nameCtrl.text = customerList?.data?.first.customerName ?? '';
+          _emailCtrl.text = customerList?.data?.first.email ?? '';
+
+          addressLine1Ctrl.text =
+              customerList?.data?.first.address?.addressLine1 ?? '';
+          addressLine2Ctrl.text =
+              customerList?.data?.first.address?.addressLine2 ?? '';
+          stateCtrl.text = customerList?.data?.first.address?.state ?? '';
+          cityCtrl.text = customerList?.data?.first.address?.city ?? '';
+          zipCodeCtrl.text = customerList?.data?.first.address?.zipCode ?? '';
+          _addressCtrl.text =
+              '${addressLine1Ctrl.text}, ${addressLine2Ctrl.text}, ${cityCtrl.text}, ${stateCtrl.text}, ${zipCodeCtrl.text}';
+        });
+      }
+    });
+  }
 
   void startTimer() {
     _isOtpValidated = false;
@@ -61,6 +104,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SnackBarService.instance.buildContext = context;
+    _api = Provider.of<ApiProvider>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -99,12 +144,52 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
           icon: LineAwesomeIcons.at,
         ),
         verticalGap(defaultPadding / 2),
-        InputFieldLight(
-          hint: 'Address',
-          controller: _addressCtrl,
-          keyboardType: TextInputType.streetAddress,
-          obscure: false,
-          icon: LineAwesomeIcons.home,
+        InkWell(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                backgroundColor: backgroundDark,
+                title: const Text('Address'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      _addressCtrl.text = '';
+                      addressLine1Ctrl.text = '';
+                      addressLine2Ctrl.text = '';
+                      cityCtrl.text = '';
+                      stateCtrl.text = '';
+                      zipCodeCtrl.text = '';
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Clear'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _addressCtrl.text =
+                          '${addressLine1Ctrl.text}, ${addressLine2Ctrl.text}, ${cityCtrl.text}, ${stateCtrl.text}, ${zipCodeCtrl.text}';
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Okay'),
+                  ),
+                ],
+                content: AddAddressScreen(
+                    addressLine1Ctrl: addressLine1Ctrl,
+                    addressLine2Ctrl: addressLine2Ctrl,
+                    cityCtrl: cityCtrl,
+                    stateCtrl: stateCtrl,
+                    zipCodeCtrl: zipCodeCtrl),
+              ),
+            );
+          },
+          child: InputFieldLight(
+            hint: 'Address',
+            controller: _addressCtrl,
+            keyboardType: TextInputType.streetAddress,
+            obscure: false,
+            enabled: false,
+            icon: LineAwesomeIcons.home,
+          ),
         ),
         verticalGap(defaultPadding / 2),
         Align(
@@ -203,12 +288,71 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
           visible: _isOtpValidated,
           child: PrimaryButtonDark(
               onPressed: () {
-                showPopup(context, DialogType.success, 'Done!',
-                    'We have received your request. You will hear from us in 24 hours');
+                if (_phoneCtrl.text.isEmpty ||
+                    _nameCtrl.text.isEmpty ||
+                    _emailCtrl.text.isEmpty ||
+                    _serialNumberCtrl.text.isEmpty ||
+                    addressLine1Ctrl.text.isEmpty ||
+                    cityCtrl.text.isEmpty ||
+                    stateCtrl.text.isEmpty ||
+                    zipCodeCtrl.text.isEmpty) {
+                  SnackBarService.instance
+                      .showSnackBarError('All fields are mandatory');
+                  return;
+                }
+
+                if (!isEmail(_emailCtrl.text)) {
+                  SnackBarService.instance
+                      .showSnackBarError('Enter valid email');
+                  return;
+                }
+                int? dealerId = prefs.getInt(SharedpreferenceKey.userId);
+                Map<String, dynamic> reqBody = {
+                  "warrantyDetails": {
+                    "warrantySerialNo": _serialNumberCtrl.text
+                  },
+                  "dealers": {"dealerId": dealerId},
+                  "customers": {
+                    "customerName": _nameCtrl.text,
+                    "mobileNo": _phoneCtrl.text,
+                    "email": _emailCtrl.text,
+                    "address": {
+                      "addressLine1": addressLine1Ctrl.text,
+                      "addressLine2": addressLine2Ctrl.text,
+                      "city": cityCtrl.text,
+                      "state": stateCtrl.text,
+                      "country": "India",
+                      "zipCode": zipCodeCtrl.text
+                    },
+                  },
+                  "allocationStatus": "PENDING",
+                  "initUserType": "DEALER",
+                  "initiatedBy": "$dealerId",
+                  "approvedBy": ""
+                };
+
+                _api.createNewWarrantyRequest(reqBody).then((value) {
+                  if (value) {
+                    _nameCtrl.text = '';
+                    _phoneCtrl.text = '';
+                    _emailCtrl.text = '';
+                    _addressCtrl.text = '';
+                    addressLine1Ctrl.text = '';
+                    addressLine2Ctrl.text = '';
+                    cityCtrl.text = '';
+                    stateCtrl.text = '';
+                    zipCodeCtrl.text = '';
+                    _timerActive = false;
+                    _showOTPField = false;
+                    _isOtpValidated = false;
+                    showPopup(context, DialogType.success, 'Done!',
+                        'We have received your request. You will hear from us in 24 hours');
+                  }
+                });
               },
               label: 'Raise Request',
-              isDisabled: false,
-              isLoading: false),
+              isDisabled: _api.status == ApiStatus.loading,
+              isLoading: _api.status == ApiStatus.loading),
         ),
       ],
     );
