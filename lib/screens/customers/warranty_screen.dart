@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:saur_dealer/screens/customers/warranty_pdf.dart';
 import 'package:saur_dealer/screens/request/new_request_sreen.dart';
 import 'package:saur_dealer/utils/colors.dart';
+import 'package:saur_dealer/utils/date_time_formatter.dart';
+import 'package:saur_dealer/utils/helper_method.dart';
 import 'package:saur_dealer/utils/theme.dart';
 import 'package:saur_dealer/widgets/gaps.dart';
 
+import '../../model/warranty_model.dart';
+import '../../services/snakbar_service.dart';
+
 class WarrentyScreen extends StatefulWidget {
-  const WarrentyScreen({super.key});
+  const WarrentyScreen({super.key, required this.warrantyRequest});
   static const String routePath = '/warrentyScreen';
+  final WarrantyModel warrantyRequest;
 
   @override
   State<WarrentyScreen> createState() => _WarrentyScreenState();
@@ -26,7 +33,7 @@ class _WarrentyScreenState extends State<WarrentyScreen> {
             isListVisible = !isListVisible;
           }),
           child: Text(
-            'John Doe',
+            '${widget.warrantyRequest.customer?.customerName}',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
@@ -56,16 +63,19 @@ class _WarrentyScreenState extends State<WarrentyScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: warrantyCardSmallDetail(
-                                context, 'Serial No', '268899'),
+                            child: warrantyCardSmallDetail(context, 'Serial No',
+                                '${widget.warrantyRequest.warrantySerialNo}'),
+                          ),
+                          Expanded(
+                            child: warrantyCardSmallDetail(context, 'Invoice',
+                                '${widget.warrantyRequest.invoiceNo}'),
                           ),
                           Expanded(
                             child: warrantyCardSmallDetail(
-                                context, 'Invoice', 'C00374/525'),
-                          ),
-                          Expanded(
-                            child: warrantyCardSmallDetail(
-                                context, 'Issued On', '2022-11-15'),
+                                context,
+                                'Issued On',
+                                DateTimeFormatter.onlyDateShort(
+                                    widget.warrantyRequest.createdOn ?? '')),
                           ),
                         ],
                       ),
@@ -75,31 +85,32 @@ class _WarrentyScreenState extends State<WarrentyScreen> {
                       warrantyCardLargeDetail(
                         context,
                         'Cust Name',
-                        'Shree Sunil Desai',
+                        '${widget.warrantyRequest.customer?.customerName}',
                       ),
                       verticalGap(5),
                       warrantyCardLargeDetail(
                         context,
                         'Cust Address',
-                        'No:7 United Building, Paradise, M G Road, Hyderabad, Andhra Pradesh - 500003',
+                        prepareAddress(
+                            widget.warrantyRequest.customer?.address),
                       ),
                       verticalGap(5),
                       warrantyCardLargeDetail(
                         context,
                         'Dealer',
-                        'Rajat Soni',
+                        '${widget.warrantyRequest.crmDealerName}',
                       ),
                       verticalGap(5),
                       warrantyCardLargeDetail(
                         context,
                         'System info',
-                        '200 WUGL-A 58X2100-10 Guarantee*',
+                        '${widget.warrantyRequest.itemDescription} ${widget.warrantyRequest.model ?? ''}',
                       ),
                       verticalGap(5),
                       warrantyCardLargeDetail(
                         context,
                         'Valid Till',
-                        '2037-11-15',
+                        '${widget.warrantyRequest.guaranteePeriod}',
                       ),
                       const Divider(
                         color: dividerColor,
@@ -130,7 +141,11 @@ class _WarrentyScreenState extends State<WarrentyScreen> {
                           ),
                           horizontalGap(defaultPadding),
                           InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              makePdf(widget.warrantyRequest);
+                              SnackBarService.instance
+                                  .showSnackBarSuccess('Warranty downloaded');
+                            },
                             child: const Icon(
                                 LineAwesomeIcons.alternate_cloud_download,
                                 color: Colors.blue),

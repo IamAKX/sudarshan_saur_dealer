@@ -1,10 +1,17 @@
 import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:saur_dealer/screens/customers/warranty_screen.dart';
 import 'package:saur_dealer/utils/colors.dart';
+import 'package:saur_dealer/utils/enum.dart';
 
+import '../../model/list_model/warranty_request_list.dart';
+import '../../services/api_service.dart';
+import '../../services/snakbar_service.dart';
+import '../../utils/preference_key.dart';
 import '../../utils/theme.dart';
 import '../../widgets/gaps.dart';
 
@@ -17,10 +24,33 @@ class CustomersScreen extends StatefulWidget {
 }
 
 class _CustomersScreenState extends State<CustomersScreen> {
-  bool isListVisible = true;
+  late ApiProvider _api;
+  WarrantyRequestList? list;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => reloadScreen(),
+    );
+  }
+
+  reloadScreen() async {
+    await _api
+        .getWarrantyRequestListByDealerId(SharedpreferenceKey.getUserId())
+        .then((value) {
+      setState(() {
+        list = value;
+        list?.data?.retainWhere((element) =>
+            element.allocationStatus == AllocationStatus.APPROVED.name);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    SnackBarService.instance.buildContext = context;
+    _api = Provider.of<ApiProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBarWithSearchSwitch(
@@ -29,14 +59,9 @@ class _CustomersScreenState extends State<CustomersScreen> {
             milliseconds: 600, withFade: false, percents: 1.0, child: child),
         onChanged: (value) {},
         appBarBuilder: (context) => AppBar(
-          title: InkWell(
-            onTap: () => setState(() {
-              isListVisible = !isListVisible;
-            }),
-            child: Text(
-              'Customers',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+          title: Text(
+            'Customers',
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
           actions: const [
             AppBarSearchButton(
@@ -50,34 +75,58 @@ class _CustomersScreenState extends State<CustomersScreen> {
   }
 
   getBody(BuildContext context) {
-    return isListVisible
+    return list?.data?.isNotEmpty ?? false
         ? ListView.separated(
             itemBuilder: (context, index) => ListTile(
                   tileColor: Colors.white,
                   leading: ClipRRect(
                     borderRadius:
                         BorderRadius.circular(settingsPageUserIconSize),
-                    child: Image.asset(
-                      'assets/images/dummy_user.jpg',
-                      height: 40,
-                      width: 40,
-                      fit: BoxFit.cover,
-                    ),
+                    child: (list?.data
+                                ?.elementAt(index)
+                                .customer
+                                ?.image
+                                ?.isEmpty ??
+                            true)
+                        ? Image.asset(
+                            'assets/images/profile_image_placeholder.png',
+                            height: 40,
+                            width: 40,
+                            fit: BoxFit.cover,
+                          )
+                        : CachedNetworkImage(
+                            imageUrl:
+                                list?.data?.elementAt(index).customer?.image ??
+                                    '',
+                            fit: BoxFit.cover,
+                            width: 40,
+                            height: 40,
+                            placeholder: (context, url) =>
+                                const CircularProgressIndicator(),
+                            errorWidget: (context, url, error) => Image.asset(
+                              'assets/images/profile_image_placeholder.png',
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
                   ),
                   title: Text(
-                    'John Doe',
+                    '${list?.data?.elementAt(index).customer?.customerName}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: textColorDark,
                         ),
                   ),
                   subtitle: Text(
-                    '126357$index',
+                    '${list?.data?.elementAt(index).warrantySerialNo}',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           color: textColorDark,
                         ),
                   ),
-                  onTap: () =>
-                      Navigator.pushNamed(context, WarrentyScreen.routePath),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    WarrentyScreen.routePath,
+                    arguments: list?.data?.elementAt(index),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -100,7 +149,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             separatorBuilder: (context, index) => const Divider(
                   color: dividerColor,
                 ),
-            itemCount: 20)
+            itemCount: list?.data?.length ?? 0)
         : noWarrantyCardWidget(context);
   }
 

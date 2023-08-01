@@ -1,12 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:saur_dealer/model/list_model/dealer_list_model.dart';
 import 'package:saur_dealer/screens/password_recovery/new_password.dart';
 import 'package:saur_dealer/screens/password_recovery/registered_phone_number.dart';
 import 'package:saur_dealer/screens/user_onboarding/otp_verification.dart';
 
+import '../../main.dart';
+import '../../model/list_model/customer_list_model.dart';
+import '../../services/api_service.dart';
+import '../../services/snakbar_service.dart';
 import '../../utils/colors.dart';
 import '../../utils/theme.dart';
 import '../../widgets/gaps.dart';
 import '../../widgets/primary_button.dart';
+import '../user_onboarding/login_screen.dart';
 
 class RecoverPasswordScreen extends StatefulWidget {
   const RecoverPasswordScreen({super.key});
@@ -24,6 +33,9 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
   final TextEditingController _phoneCtrl = TextEditingController();
   final TextEditingController _otpCodeCtrl = TextEditingController();
   int step = 1;
+  DealerListModel? dealerListModel;
+  late ApiProvider _api;
+  String code = '';
 
   @override
   void initState() {
@@ -39,6 +51,8 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
 
   @override
   Widget build(BuildContext context) {
+    SnackBarService.instance.buildContext = context;
+    _api = Provider.of<ApiProvider>(context);
     return Scaffold(
       body: getBody(context),
     );
@@ -149,7 +163,16 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
                 Visibility(
                   visible: (step == 1 || step == 2),
                   child: InkWell(
-                    onTap: () {
+                    onTap: () async {
+                      if (step == 1) {
+                        dealerListModel =
+                            await _api.getDealerMobileNumber(_phoneCtrl.text);
+                        if (dealerListModel == null ||
+                            dealerListModel?.data == null ||
+                            (dealerListModel?.data?.isEmpty ?? true)) {
+                          return;
+                        }
+                      }
                       setState(() {
                         step += 1;
                       });
@@ -169,11 +192,29 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
                     width: 250,
                     child: PrimaryButton(
                         onPressed: () {
-                          debugPrint(_otpCodeCtrl.text);
+                          if (_otpCodeCtrl.text != code) {
+                            SnackBarService.instance
+                                .showSnackBarError('Invalid OTP');
+                            return;
+                          }
+                          Map<String, dynamic> map = {
+                            'password':
+                                base64.encode(_passwordCtrl.text.codeUnits),
+                          };
+                          _api
+                              .updateUser(map,
+                                  dealerListModel?.data?.first.dealerId ?? -1)
+                              .then((value) async {
+                            if (value) {
+                              prefs.clear();
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  LoginScreen.routePath, (route) => false);
+                            }
+                          });
                         },
                         label: 'Change',
-                        isDisabled: false,
-                        isLoading: false),
+                        isDisabled: _api.status == ApiStatus.success,
+                        isLoading: _api.status == ApiStatus.success),
                   ),
                 ),
               ],

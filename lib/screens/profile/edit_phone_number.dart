@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
@@ -33,13 +34,19 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
   final TextEditingController _otpCtrl = TextEditingController();
 
   Timer? _timer;
-  static const int otpResendThreshold = 10;
+  static const int otpResendThreshold = 30;
   int _secondsRemaining = otpResendThreshold;
   bool _timerActive = false;
   bool _isValidateButtonActive = true;
 
   late ApiProvider _api;
   UserModel? user;
+  String code = '';
+
+  sendOtp() {
+    code = (Random().nextInt(9000) + 1000).toString();
+    ApiProvider().sendOtp(_phoneNumberCtrl.text, code.toString());
+  }
 
   @override
   void initState() {
@@ -111,6 +118,7 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
                     onPressed: () {
                       _isValidateButtonActive = false;
                       startTimer();
+                      sendOtp();
                     },
                     child: Text(
                       'Send OTP',
@@ -151,6 +159,11 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
               if (_phoneNumberCtrl.text.isEmpty) {
                 SnackBarService.instance
                     .showSnackBarError('All fields are mandatory');
+                return;
+              }
+
+              if (_otpCtrl.text != code) {
+                SnackBarService.instance.showSnackBarError('invalid otp');
                 return;
               }
 

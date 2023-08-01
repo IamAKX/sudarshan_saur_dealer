@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController stateCtrl = TextEditingController();
   final TextEditingController zipCodeCtrl = TextEditingController();
   int step = 1;
-
+  String code = "";
   late ApiProvider _api;
 
   @override
@@ -186,7 +187,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: 250,
                     child: PrimaryButton(
                         onPressed: () async {
-                          if (_otpCodeCtrl.text == '1234') {
+                          if (_otpCodeCtrl.text == code) {
+                            step = 1;
                             UserModel user = UserModel(
                               address: AddressModel(
                                 addressLine1: addressLine1Ctrl.text,
@@ -205,7 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               businessAddress: _businessAddressCtrl.text,
                               businessName: _businessNameCtrl.text,
                               gstNumber: _gstNumberCtrl.text,
-                              status: UserStatus.BLOCKED.name,
+                              status: UserStatus.CREATED.name,
                             );
 
                             _api.createUser(user).then((value) {
@@ -256,9 +258,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           zipCodeCtrl: zipCodeCtrl,
         );
       case 4:
+        code = (Random().nextInt(9000) + 1000).toString();
+        ApiProvider().sendOtp(_phoneCtrl.text, code.toString());
         return OtpVerification(
           phoneCtrl: _phoneCtrl,
-          otpCode: '1234',
+          otpCode: code,
           otpCodeCtrl: _otpCodeCtrl,
         );
       default:

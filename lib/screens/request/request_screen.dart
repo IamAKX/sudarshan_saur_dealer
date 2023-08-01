@@ -1,8 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 import 'package:saur_dealer/screens/request/new_request_sreen.dart';
+import 'package:saur_dealer/screens/request/warranty_detail.dart';
+import 'package:saur_dealer/utils/date_time_formatter.dart';
+import 'package:saur_dealer/utils/helper_method.dart';
 
+import '../../model/list_model/warranty_request_list.dart';
+import '../../services/api_service.dart';
+import '../../services/snakbar_service.dart';
 import '../../utils/colors.dart';
+import '../../utils/preference_key.dart';
 import '../../utils/theme.dart';
 import '../../widgets/gaps.dart';
 
@@ -18,19 +27,36 @@ class RequestScreen extends StatefulWidget {
 }
 
 class _RequestScreenState extends State<RequestScreen> {
-  bool isListVisible = false;
+  late ApiProvider _api;
+  WarrantyRequestList? list;
+
   @override
-  Widget build(BuildContext context) { 
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => reloadScreen(),
+    );
+  }
+
+  reloadScreen() async {
+    await _api
+        .getWarrantyRequestListByDealerId(SharedpreferenceKey.getUserId())
+        .then((value) {
+      setState(() {
+        list = value;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SnackBarService.instance.buildContext = context;
+    _api = Provider.of<ApiProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: InkWell(
-          onTap: () => setState(() {
-            isListVisible = !isListVisible;
-          }),
-          child: Text(
-            'Warranty Request',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+        title: Text(
+          'Warranty Request',
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
       ),
       body: getBody(context),
@@ -50,271 +76,142 @@ class _RequestScreenState extends State<RequestScreen> {
   }
 
   getBody(BuildContext context) {
-    return isListVisible
+    return list?.data?.isNotEmpty ?? false
         ? Padding(
             padding: const EdgeInsets.all(defaultPadding),
-            child: ListView(
-              children: [
-                // Pending tile
-                ExpansionTile(
-                  tilePadding: const EdgeInsets.symmetric(
-                      vertical: defaultPadding / 2, horizontal: defaultPadding),
-                  textColor: textColorDark,
-                  collapsedBackgroundColor: Colors.white,
-                  backgroundColor: pendingColor.withOpacity(0.1),
-                  title: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(settingsPageUserIconSize),
-                        child: Image.asset(
-                          'assets/images/dummy_user.jpg',
-                          height: 40,
-                          width: 40,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      horizontalGap(defaultPadding),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'John Doe',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  color: textColorDark,
-                                ),
-                          ),
-                          Text(
-                            '2544845',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: textColorDark,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  subtitle: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '5h ago',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: hintColor,
-                            ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: defaultPadding / 2),
-                        width: 3,
-                        height: defaultPadding * 0.75,
-                        color: dividerColor,
-                      ),
-                      Text(
-                        'Request in review',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: pendingColor,
-                            ),
-                      ),
-                    ],
-                  ),
+            child: ListView.builder(
+              itemCount: list?.data?.length ?? 0,
+              itemBuilder: (context, index) => ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(
+                    vertical: defaultPadding / 2, horizontal: defaultPadding),
+                textColor: textColorDark,
+                collapsedBackgroundColor: Colors.white,
+                backgroundColor: getColorByStatus(
+                        list?.data?.elementAt(index).allocationStatus ?? '')
+                    .withOpacity(0.1),
+                title: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      width: double.maxFinite,
-                      color: pendingColor,
-                      child: Container(
-                        margin: const EdgeInsets.only(left: defaultPadding / 2),
-                        color: Colors.white,
-                        child: const Padding(
-                          padding: EdgeInsets.all(defaultPadding / 2),
-                          child: Text(
-                              'Your request is under validation, you will be notified in 24 hours'),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                // Accepted
-                ExpansionTile(
-                  tilePadding: const EdgeInsets.symmetric(
-                      vertical: defaultPadding / 2, horizontal: defaultPadding),
-                  textColor: textColorDark,
-                  collapsedBackgroundColor: Colors.white,
-                  backgroundColor: acceptedColor.withOpacity(0.1),
-                  title: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(settingsPageUserIconSize),
-                        child: Image.asset(
-                          'assets/images/dummy_user.jpg',
-                          height: 40,
-                          width: 40,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      horizontalGap(defaultPadding),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'John Doe',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  color: textColorDark,
-                                ),
-                          ),
-                          Text(
-                            '2544845',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: textColorDark,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  subtitle: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '1d ago',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: hintColor,
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(settingsPageUserIconSize),
+                      child: (list?.data
+                                  ?.elementAt(index)
+                                  .customer
+                                  ?.image
+                                  ?.isEmpty ??
+                              true)
+                          ? Image.asset(
+                              'assets/images/profile_image_placeholder.png',
+                              height: 40,
+                              width: 40,
+                              fit: BoxFit.cover,
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: list?.data
+                                      ?.elementAt(index)
+                                      .customer
+                                      ?.image ??
+                                  '',
+                              fit: BoxFit.cover,
+                              width: 40,
+                              height: 40,
+                              placeholder: (context, url) =>
+                                  const CircularProgressIndicator(),
+                              errorWidget: (context, url, error) => Image.asset(
+                                'assets/images/profile_image_placeholder.png',
+                                width: 40,
+                                height: 40,
+                              ),
                             ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: defaultPadding / 2),
-                        width: 3,
-                        height: defaultPadding * 0.75,
-                        color: dividerColor,
-                      ),
-                      Text(
-                        'Request is approved',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: acceptedColor,
-                            ),
-                      ),
-                    ],
-                  ),
-                  children: [
-                    Container(
-                      width: double.maxFinite,
-                      color: acceptedColor,
-                      child: Container(
-                        margin: const EdgeInsets.only(left: defaultPadding / 2),
-                        color: Colors.white,
-                        child: const Padding(
-                          padding: EdgeInsets.all(defaultPadding / 2),
-                          child: Text(
-                              'Your warranty card is generated. You get download or get it on email or whatsapp.'),
+                    ),
+                    horizontalGap(defaultPadding),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          list?.data?.elementAt(index).customer?.customerName ??
+                              '',
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: textColorDark,
+                                  ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-                // Rejected
-                ExpansionTile(
-                  tilePadding: const EdgeInsets.symmetric(
-                      vertical: defaultPadding / 2, horizontal: defaultPadding),
-                  textColor: textColorDark,
-                  collapsedBackgroundColor: Colors.white,
-                  backgroundColor: rejectedColor.withOpacity(0.1),
-                  title: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(settingsPageUserIconSize),
-                        child: Image.asset(
-                          'assets/images/dummy_user.jpg',
-                          height: 40,
-                          width: 40,
-                          fit: BoxFit.cover,
+                        Text(
+                          list?.data?.elementAt(index).warrantySerialNo ?? '',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: textColorDark,
+                                  ),
                         ),
-                      ),
-                      horizontalGap(defaultPadding),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'John Doe',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  color: textColorDark,
-                                ),
-                          ),
-                          Text(
-                            '2544845',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: textColorDark,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  subtitle: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '2w ago',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: hintColor,
-                            ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: defaultPadding / 2),
-                        width: 3,
-                        height: defaultPadding * 0.75,
-                        color: dividerColor,
-                      ),
-                      Text(
-                        'Request is rejected',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: rejectedColor,
-                            ),
-                      ),
-                    ],
-                  ),
-                  childrenPadding: EdgeInsets.zero,
-                  children: [
-                    Container(
-                      width: double.maxFinite,
-                      color: rejectedColor,
-                      child: Container(
-                        margin: const EdgeInsets.only(left: defaultPadding / 2),
-                        color: Colors.white,
-                        child: const Padding(
-                          padding: EdgeInsets.all(defaultPadding / 2),
-                          child: Text(
-                              'The serial number in your request is incorrect'),
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+                subtitle: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      DateTimeFormatter.timesAgo(
+                          list?.data?.elementAt(index).createdOn ?? ''),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: hintColor,
+                          ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: defaultPadding / 2),
+                      width: 3,
+                      height: defaultPadding * 0.75,
+                      color: dividerColor,
+                    ),
+                    Text(
+                      getShortMessageByStatus(
+                          list?.data?.elementAt(index).allocationStatus ?? ''),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: getColorByStatus(
+                                list?.data?.elementAt(index).allocationStatus ??
+                                    ''),
+                          ),
+                    ),
+                  ],
+                ),
+                children: [
+                  Container(
+                    width: double.maxFinite,
+                    color: getColorByStatus(
+                        list?.data?.elementAt(index).allocationStatus ?? ''),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            margin:
+                                const EdgeInsets.only(left: defaultPadding / 2),
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(defaultPadding / 2),
+                              child: Text(
+                                getDetailedMessageByStatus(list?.data
+                                        ?.elementAt(index)
+                                        .allocationStatus ??
+                                    ''),
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(
+                                WarrantyDetailScreen.routePath,
+                                arguments: list?.data?.elementAt(index));
+                          },
+                          icon: const Icon(Icons.info),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           )
         : noRequestWidget(context);

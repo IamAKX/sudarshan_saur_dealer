@@ -10,6 +10,7 @@ import 'screens/blocked_user/blocked_users_screen.dart';
 import 'screens/home_container/home_container.dart';
 import 'screens/user_onboarding/login_screen.dart';
 import 'services/api_service.dart';
+import 'utils/date_time_formatter.dart';
 import 'utils/enum.dart';
 import 'utils/preference_key.dart';
 
@@ -21,6 +22,11 @@ Future<void> main() async {
   if (prefs.getInt(SharedpreferenceKey.userId) != null) {
     userModel = await ApiProvider()
         .getDealerById(prefs.getInt(SharedpreferenceKey.userId) ?? -1);
+
+    if (userModel != null) {
+      await ApiProvider().updateUser(
+          {'lastLogin': DateTimeFormatter.now()}, userModel?.dealerId ?? 0);
+    }
   }
   runApp(const MyApp());
 }

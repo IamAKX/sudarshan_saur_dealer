@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
+import 'dart:math';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +53,12 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   late ApiProvider _api;
   CustomerListModel? customerList;
+  String code = "";
+
+  sendOtp() {
+    code = (Random().nextInt(9000) + 1000).toString();
+    ApiProvider().sendOtp(_phoneCtrl.text, code.toString());
+  }
 
   @override
   void initState() {
@@ -61,7 +67,6 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     _phoneCtrl.addListener(() {
       if (_phoneCtrl.text.isNotEmpty) {
         _api.getCustomerByPhone(_phoneCtrl.text).then((value) {
-          log(value.toString());
           customerList = value;
           _nameCtrl.text = customerList?.data?.first.customerName ?? '';
           _emailCtrl.text = customerList?.data?.first.email ?? '';
@@ -203,6 +208,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                   onPressed: () {
                     _showOTPField = true;
                     startTimer();
+                    sendOtp();
                   },
                   child: Text(
                     'Send OTP',
@@ -258,7 +264,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
               _otpCtrl.text = pin;
 
               setState(() {
-                if (pin == '1234') {
+                if (pin == code) {
                   _isOtpValidated = true;
                 } else {
                   _isOtpValidated = false;
@@ -308,11 +314,10 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                 }
                 int? dealerId = prefs.getInt(SharedpreferenceKey.userId);
                 Map<String, dynamic> reqBody = {
-                  "warrantyDetails": {
-                    "warrantySerialNo": _serialNumberCtrl.text
-                  },
+                  "warrantySerialNo": _serialNumberCtrl.text,
                   "dealers": {"dealerId": dealerId},
-                  "customers": {
+                  "customer": {
+                    "customerId": customerList?.data?.first.customerId ?? 0,
                     "customerName": _nameCtrl.text,
                     "mobileNo": _phoneCtrl.text,
                     "email": _emailCtrl.text,

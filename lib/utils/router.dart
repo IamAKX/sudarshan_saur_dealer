@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:saur_dealer/screens/blocked_user/blocked_users_screen.dart';
 import 'package:saur_dealer/screens/request/new_request_sreen.dart';
+import 'package:saur_dealer/screens/request/warranty_detail.dart';
 
+import '../model/warranty_model.dart';
 import '../screens/app_intro/app_intro_screen.dart';
 import '../screens/customers/warranty_screen.dart';
 import '../screens/home_container/home_container.dart';
@@ -35,9 +37,17 @@ class NavRoute {
       case ChangePassword.routePath:
         return MaterialPageRoute(builder: (_) => const ChangePassword());
       case WarrentyScreen.routePath:
-        return MaterialPageRoute(builder: (_) => const WarrentyScreen());
+        return MaterialPageRoute(
+            builder: (_) => WarrentyScreen(
+                  warrantyRequest: settings.arguments as WarrantyModel,
+                ));
       case BlockedUserScreen.routePath:
         return MaterialPageRoute(builder: (_) => const BlockedUserScreen());
+      case WarrantyDetailScreen.routePath:
+        return MaterialPageRoute(
+            builder: (_) => WarrantyDetailScreen(
+                  warrantyRequest: settings.arguments as WarrantyModel,
+                ));
 
       default:
         return errorRoute();
