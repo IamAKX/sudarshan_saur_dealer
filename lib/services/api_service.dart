@@ -287,9 +287,7 @@ class ApiProvider extends ChangeNotifier {
     return list;
   }
 
-
-  Future<WarrantyRequestList?> getWarrantyRequestListByDealerId(
-      int id) async {
+  Future<WarrantyRequestList?> getWarrantyRequestListByDealerId(int id) async {
     status = ApiStatus.loading;
     notifyListeners();
     WarrantyRequestList? list;
@@ -396,6 +394,7 @@ class ApiProvider extends ChangeNotifier {
   Future<bool> sendOtp(String phone, String otp) async {
     status = ApiStatus.loading;
     notifyListeners();
+    debugPrint(Api.buildOtpUrl(phone, otp));
     try {
       Response response = await _dio.get(
         Api.buildOtpUrl(phone, otp),
