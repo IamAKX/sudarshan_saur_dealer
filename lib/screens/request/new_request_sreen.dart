@@ -262,7 +262,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
             fieldStyle: FieldStyle.underline,
             onCompleted: (pin) {
               _otpCtrl.text = pin;
-
+              debugPrint('${_otpCtrl.text} = $pin');
               setState(() {
                 if (pin == code) {
                   _isOtpValidated = true;
