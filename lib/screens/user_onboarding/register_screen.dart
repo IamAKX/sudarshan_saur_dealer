@@ -1,17 +1,30 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:saur_dealer/screens/user_onboarding/business_detail.dart';
 import 'package:saur_dealer/screens/user_onboarding/otp_verification.dart';
 import 'package:saur_dealer/screens/user_onboarding/user_detail.dart';
 import 'package:saur_dealer/utils/theme.dart';
 import 'package:saur_dealer/widgets/gaps.dart';
 import 'package:saur_dealer/widgets/primary_button.dart';
+import 'package:string_validator/string_validator.dart';
 
+import '../../model/address_model.dart';
+import '../../model/user_model.dart';
+import '../../services/api_service.dart';
+import '../../services/snakbar_service.dart';
 import '../../utils/colors.dart';
+import '../../utils/date_time_formatter.dart';
+import '../../utils/enum.dart';
 import 'address_screen.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
   static const String routePath = '/register';
+  static bool agreementStatus = false;
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -32,9 +45,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController stateCtrl = TextEditingController();
   final TextEditingController zipCodeCtrl = TextEditingController();
   int step = 1;
+  String code = "";
+  late ApiProvider _api;
 
   @override
   Widget build(BuildContext context) {
+    SnackBarService.instance.buildContext = context;
+    _api = Provider.of<ApiProvider>(context);
     return Scaffold(
       body: getBody(context),
     );
@@ -127,11 +144,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Visibility(
                   visible: step > 1,
                   child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        step--;
-                      });
-                    },
+                    onTap: _api.status == ApiStatus.loading
+                        ? null
+                        : () {
+                            setState(() {
+                              step--;
+                            });
+                          },
                     child: const CircleAvatar(
                       backgroundColor: Colors.white,
                       child: Icon(
@@ -146,6 +165,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   visible: step < 4,
                   child: InkWell(
                     onTap: () {
+                      if (!validateInput()) {
+                        return;
+                      }
                       setState(() {
                         step++;
                       });
@@ -164,12 +186,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: SizedBox(
                     width: 250,
                     child: PrimaryButton(
-                        onPressed: () {
-                          debugPrint(_otpCodeCtrl.text);
+                        onPressed: () async {
+                          if (_otpCodeCtrl.text == code) {
+                            step = 1;
+                            UserModel user = UserModel(
+                              address: AddressModel(
+                                addressLine1: addressLine1Ctrl.text,
+                                addressLine2: addressLine2Ctrl.text,
+                                city: cityCtrl.text,
+                                country: 'India',
+                                state: stateCtrl.text,
+                                zipCode: zipCodeCtrl.text,
+                              ),
+                              dealerName: _nameCtrl.text,
+                              email: _emailCtrl.text,
+                              password:
+                                  base64.encode(_passwordCtrl.text.codeUnits),
+                              lastLogin: DateTimeFormatter.now(),
+                              mobileNo: _phoneCtrl.text,
+                              businessAddress: _businessAddressCtrl.text,
+                              businessName: _businessNameCtrl.text,
+                              gstNumber: _gstNumberCtrl.text,
+                              status: UserStatus.CREATED.name,
+                            );
+
+                            _api.createUser(user).then((value) {
+                              if (value) {
+                                Navigator.pushNamedAndRemoveUntil(context,
+                                    LoginScreen.routePath, (route) => false);
+                              }
+                            });
+                          } else {
+                            SnackBarService.instance
+                                .showSnackBarError('Invalid OTP');
+                          }
                         },
                         label: 'Register',
-                        isDisabled: false,
-                        isLoading: false),
+                        isDisabled: _api.status == ApiStatus.loading,
+                        isLoading: _api.status == ApiStatus.loading),
                   ),
                 ),
               ],
@@ -204,12 +258,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
           zipCodeCtrl: zipCodeCtrl,
         );
       case 4:
+        code = (Random().nextInt(9000) + 1000).toString();
+        ApiProvider().sendOtp(_phoneCtrl.text, code.toString());
         return OtpVerification(
           phoneCtrl: _phoneCtrl,
-          otpCode: '1234',
+          otpCode: code,
           otpCodeCtrl: _otpCodeCtrl,
         );
       default:
     }
+  }
+
+  bool validateInput() {
+    if (step == 1) {
+      if (_nameCtrl.text.isEmpty ||
+          _emailCtrl.text.isEmpty ||
+          _passwordCtrl.text.isEmpty ||
+          _phoneCtrl.text.isEmpty) {
+        SnackBarService.instance.showSnackBarError('All fields are mandatory');
+        return false;
+      }
+      if (!isEmail(_emailCtrl.text)) {
+        SnackBarService.instance.showSnackBarError('Enter valid email address');
+        return false;
+      }
+      if (_phoneCtrl.text.length != 10 || !isNumeric(_phoneCtrl.text)) {
+        SnackBarService.instance.showSnackBarError('Enter valid phone number');
+        return false;
+      }
+      if (_passwordCtrl.text.length < 8) {
+        SnackBarService.instance
+            .showSnackBarError('Password must be of atleast 8 charaters');
+        return false;
+      }
+      if (!RegisterScreen.agreementStatus) {
+        SnackBarService.instance
+            .showSnackBarError('Check the agreement checkbox');
+        return false;
+      }
+    }
+    if (step == 2) {
+      if (addressLine1Ctrl.text.isEmpty ||
+          cityCtrl.text.isEmpty ||
+          stateCtrl.text.isEmpty ||
+          zipCodeCtrl.text.isEmpty) {
+        SnackBarService.instance.showSnackBarError('All fields are mandatory');
+        return false;
+      }
+    }
+    if (step == 3) {
+      if (_businessNameCtrl.text.isEmpty ||
+          _businessAddressCtrl.text.isEmpty ||
+          _gstNumberCtrl.text.isEmpty) {
+        SnackBarService.instance.showSnackBarError('All fields are mandatory');
+        return false;
+      }
+    }
+
+    return true;
   }
 }
