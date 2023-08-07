@@ -162,7 +162,7 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
                 return;
               }
 
-              if (_otpCtrl.text != code) {
+              if (code == '' || _otpCtrl.text != code) {
                 SnackBarService.instance.showSnackBarError('invalid otp');
                 return;
               }

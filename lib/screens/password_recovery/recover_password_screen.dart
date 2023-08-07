@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -172,6 +173,12 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
                             (dealerListModel?.data?.isEmpty ?? true)) {
                           return;
                         }
+                      } else if (step == 2) {
+                        if (code == '' || _otpCodeCtrl.text != code) {
+                          SnackBarService.instance
+                              .showSnackBarError('Invalid OTP');
+                          return;
+                        }
                       }
                       setState(() {
                         step += 1;
@@ -192,7 +199,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
                     width: 250,
                     child: PrimaryButton(
                         onPressed: () {
-                          if (_otpCodeCtrl.text != code) {
+                          if (code != '' && _otpCodeCtrl.text != code) {
                             SnackBarService.instance
                                 .showSnackBarError('Invalid OTP');
                             return;
@@ -213,8 +220,8 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
                           });
                         },
                         label: 'Change',
-                        isDisabled: _api.status == ApiStatus.success,
-                        isLoading: _api.status == ApiStatus.success),
+                        isDisabled: _api.status == ApiStatus.loading,
+                        isLoading: _api.status == ApiStatus.loading),
                   ),
                 ),
               ],
@@ -231,8 +238,10 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen>
       case 1:
         return RegisteredPhoneNumber(phoneCtrl: _phoneCtrl);
       case 2:
+        code = (Random().nextInt(9000) + 1000).toString();
+        ApiProvider().sendOtp(_phoneCtrl.text, code.toString());
         return OtpVerification(
-            phoneCtrl: _phoneCtrl, otpCode: '1234', otpCodeCtrl: _otpCodeCtrl);
+            phoneCtrl: _phoneCtrl, otpCode: code, otpCodeCtrl: _otpCodeCtrl);
       case 3:
         return NewPassword(passwordCtrl: _passwordCtrl);
       default:

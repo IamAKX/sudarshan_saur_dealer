@@ -187,7 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: 250,
                     child: PrimaryButton(
                         onPressed: () async {
-                          if (_otpCodeCtrl.text == code) {
+                          if (code != '' && _otpCodeCtrl.text == code) {
                             step = 1;
                             UserModel user = UserModel(
                               address: AddressModel(
