@@ -33,33 +33,14 @@ class ApiProvider extends ChangeNotifier {
 
   Future<bool> createUser(UserModel user) async {
     status = ApiStatus.loading;
+    log('into create user');
     notifyListeners();
     try {
-      Map<String, dynamic> requestBody = {
-        "dealerName": user.dealerName,
-        "password": user.password,
-        "mobileNo": user.mobileNo,
-        "status": user.status,
-        "email": user.email,
-        "address": {
-          "addressLine1": user.address?.addressLine1,
-          "addressLine2": user.address?.addressLine2,
-          "city": user.address?.city,
-          "state": user.address?.state,
-          "country": "India",
-          "zipCode": user.address?.zipCode
-        },
-        "image": user.image,
-        "lastLogin": user.lastLogin,
-        "businessName": user.businessName,
-        "businessAddress": user.businessAddress,
-        "gstNumber": user.gstNumber
-      };
-
-      log('request : ${json.encode(requestBody)}');
+      Map<String, dynamic> reqBody = user.toMap();
+      debugPrint('request : ${json.encode(reqBody)}');
       Response response = await _dio.post(
         Api.users,
-        data: json.encode(requestBody),
+        data: json.encode(reqBody),
         options: Options(
           contentType: 'application/json',
           responseType: ResponseType.json,
@@ -75,6 +56,41 @@ class ApiProvider extends ChangeNotifier {
           status = ApiStatus.failed;
           notifyListeners();
         }
+        return true;
+      }
+    } on DioException catch (e) {
+      status = ApiStatus.failed;
+      var resBody = e.response?.data ?? {};
+      log(e.response?.data.toString() ?? e.response.toString());
+      notifyListeners();
+      SnackBarService.instance
+          .showSnackBarError('Error : ${resBody['message']}');
+    } catch (e) {
+      status = ApiStatus.failed;
+      notifyListeners();
+      SnackBarService.instance.showSnackBarError(e.toString());
+      log(e.toString());
+    }
+    status = ApiStatus.failed;
+    notifyListeners();
+    return false;
+  }
+
+  Future<bool> validateStockist(String code) async {
+    status = ApiStatus.loading;
+    notifyListeners();
+    log('${Api.validateStockist}dealer_code=$code');
+    try {
+      Response response = await _dio.get(
+        '${Api.validateStockist}dealer_code=$code',
+        options: Options(
+          contentType: 'application/json',
+          responseType: ResponseType.json,
+        ),
+      );
+      if (response.statusCode == 200) {
+        status = ApiStatus.success;
+        notifyListeners();
         return true;
       }
     } on DioException catch (e) {

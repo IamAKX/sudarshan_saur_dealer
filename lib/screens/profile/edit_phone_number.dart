@@ -43,11 +43,6 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
   UserModel? user;
   String code = '';
 
-  sendOtp() {
-    code = (Random().nextInt(9000) + 1000).toString();
-    ApiProvider().sendOtp(_phoneNumberCtrl.text, code.toString());
-  }
-
   @override
   void initState() {
     super.initState();
@@ -65,6 +60,11 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
         _phoneNumberCtrl.text = user?.mobileNo ?? '';
       });
     });
+  }
+
+  sendOtp() {
+    code = (Random().nextInt(9000) + 1000).toString();
+    ApiProvider().sendOtp(_phoneNumberCtrl.text, code.toString());
   }
 
   void startTimer() {
@@ -163,7 +163,7 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
               }
 
               if (code == '' || _otpCtrl.text != code) {
-                SnackBarService.instance.showSnackBarError('invalid otp');
+                SnackBarService.instance.showSnackBarError('Invalid otp');
                 return;
               }
 

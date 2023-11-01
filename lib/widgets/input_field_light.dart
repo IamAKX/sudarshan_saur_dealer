@@ -8,7 +8,8 @@ class InputFieldLight extends StatelessWidget {
       required this.keyboardType,
       required this.obscure,
       required this.icon,
-      this.enabled})
+      this.enabled,
+      this.maxChar})
       : super(key: key);
 
   final String hint;
@@ -18,6 +19,7 @@ class InputFieldLight extends StatelessWidget {
   final IconData icon;
 
   final bool? enabled;
+  final int? maxChar;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +27,7 @@ class InputFieldLight extends StatelessWidget {
       enabled: enabled ?? true,
       keyboardType: keyboardType,
       autocorrect: true,
+      maxLength: maxChar,
       obscureText: obscure,
       controller: controller,
       decoration: InputDecoration(

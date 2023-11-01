@@ -11,7 +11,10 @@ import '../screens/home_container/home_container.dart';
 import '../screens/password_recovery/recover_password_screen.dart';
 import '../screens/profile/change_password.dart';
 import '../screens/profile/edit_profile.dart';
+import '../screens/user_onboarding/address_screen.dart';
 import '../screens/user_onboarding/agreement_screen.dart';
+import '../screens/user_onboarding/business_detail.dart';
+import '../screens/user_onboarding/change_phone.dart';
 import '../screens/user_onboarding/login_screen.dart';
 import '../screens/user_onboarding/register_screen.dart';
 
@@ -36,6 +39,14 @@ class NavRoute {
         return MaterialPageRoute(builder: (_) => const EditProfile());
       case ChangePassword.routePath:
         return MaterialPageRoute(builder: (_) => const ChangePassword());
+
+      case AddressScreen.routePath:
+        return MaterialPageRoute(builder: (_) => const AddressScreen());
+      case BusinessDetails.routePath:
+        return MaterialPageRoute(builder: (_) => const BusinessDetails());
+      case ChangePhoneNumber.routePath:
+        return MaterialPageRoute(builder: (_) => const ChangePhoneNumber());
+
       case WarrentyScreen.routePath:
         return MaterialPageRoute(
             builder: (_) => WarrentyScreen(

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 
 class InputFieldDark extends StatelessWidget {
-  const InputFieldDark(
-      {Key? key,
-      required this.hint,
-      required this.controller,
-      required this.keyboardType,
-      required this.obscure,
-      required this.icon,
-      this.enabled,
-      this.maxLines})
-      : super(key: key);
+  const InputFieldDark({
+    Key? key,
+    required this.hint,
+    required this.controller,
+    required this.keyboardType,
+    required this.obscure,
+    required this.icon,
+    this.enabled,
+    this.maxLines,
+    this.maxChar,
+  }) : super(key: key);
 
   final String hint;
   final TextEditingController controller;
@@ -20,6 +21,7 @@ class InputFieldDark extends StatelessWidget {
 
   final bool? enabled;
   final int? maxLines;
+  final int? maxChar;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class InputFieldDark extends StatelessWidget {
       enabled: enabled ?? true,
       keyboardType: keyboardType,
       autocorrect: true,
+      maxLength: maxChar,
       obscureText: obscure,
       maxLines: maxLines ?? 1,
       controller: controller,

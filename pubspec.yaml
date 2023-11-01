@@ -1,7 +1,7 @@
 name: saur_dealer
 description: A new Flutter project.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+4
+version: 1.0.0+7
 
 environment:
   sdk: ">=3.0.3 <4.0.0"
@@ -12,6 +12,7 @@ dependencies:
   cached_network_image: any
   cupertino_icons: ^1.0.2
   dio: ^5.2.1+1
+  dropdown_button2: ^2.3.9
   firebase_core: ^2.15.0
   firebase_storage: ^11.2.5
   flashy_tab_bar2: ^0.0.6

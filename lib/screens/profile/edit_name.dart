@@ -26,11 +26,11 @@ class EditName extends StatefulWidget {
 class _EditNameState extends State<EditName> {
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _businessNameCtrl = TextEditingController();
-  final TextEditingController _businessAddressCtrl = TextEditingController();
   final TextEditingController _gstNumberCtrl = TextEditingController();
 
   late ApiProvider _api;
   UserModel? user;
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +47,6 @@ class _EditNameState extends State<EditName> {
         user = value;
         _nameCtrl.text = user?.dealerName ?? '';
         _businessNameCtrl.text = user?.businessName ?? '';
-        _businessAddressCtrl.text = user?.businessAddress ?? '';
         _gstNumberCtrl.text = user?.gstNumber ?? '';
       });
     });
@@ -84,17 +83,6 @@ class _EditNameState extends State<EditName> {
             icon: LineAwesomeIcons.briefcase),
         verticalGap(defaultPadding),
         const Text(
-          'Enter Business Address',
-        ),
-        verticalGap(defaultPadding),
-        InputFieldLight(
-            hint: 'Business Address',
-            controller: _businessAddressCtrl,
-            keyboardType: TextInputType.streetAddress,
-            obscure: false,
-            icon: LineAwesomeIcons.address_card),
-        verticalGap(defaultPadding),
-        const Text(
           'Enter GST Number',
         ),
         verticalGap(defaultPadding),
@@ -108,7 +96,6 @@ class _EditNameState extends State<EditName> {
         PrimaryButtonDark(
           onPressed: () async {
             if (_nameCtrl.text.isEmpty ||
-                _businessAddressCtrl.text.isEmpty ||
                 _businessNameCtrl.text.isEmpty ||
                 _gstNumberCtrl.text.isEmpty) {
               SnackBarService.instance
@@ -118,7 +105,6 @@ class _EditNameState extends State<EditName> {
 
             Map<String, dynamic> map = {
               "dealerName": _nameCtrl.text,
-              "businessAddress": _businessAddressCtrl.text,
               "businessName": _businessNameCtrl.text,
               "gstNumber": _gstNumberCtrl.text
             };
@@ -126,7 +112,7 @@ class _EditNameState extends State<EditName> {
               if (value) {
                 await reloadScreen();
                 showPopup(context, DialogType.success, 'Success',
-                    'Your personal detail is updated');
+                    'Your detail is updated');
               }
             });
           },

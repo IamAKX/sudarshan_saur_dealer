@@ -72,11 +72,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
           _emailCtrl.text = customerList?.data?.first.email ?? '';
 
           addressLine1Ctrl.text =
-              customerList?.data?.first.address?.addressLine1 ?? '';
+              customerList?.data?.first.address?.street1 ?? '';
           addressLine2Ctrl.text =
-              customerList?.data?.first.address?.addressLine2 ?? '';
+              customerList?.data?.first.address?.street2 ?? '';
           stateCtrl.text = customerList?.data?.first.address?.state ?? '';
-          cityCtrl.text = customerList?.data?.first.address?.city ?? '';
+          cityCtrl.text = customerList?.data?.first.address?.town ?? '';
           zipCodeCtrl.text = customerList?.data?.first.address?.zipCode ?? '';
           _addressCtrl.text =
               '${addressLine1Ctrl.text}, ${addressLine2Ctrl.text}, ${cityCtrl.text}, ${stateCtrl.text}, ${zipCodeCtrl.text}';

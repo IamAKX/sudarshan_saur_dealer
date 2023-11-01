@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../model/address_model.dart';
 
 String getShortMessageByStatus(String status) {
@@ -27,5 +29,40 @@ String getDetailedMessageByStatus(String status) {
 }
 
 String prepareAddress(AddressModel? address) {
-  return '${address?.addressLine1}, ${address?.addressLine2}, ${address?.city}, ${address?.state} - ${address?.zipCode}';
+  return '';
+  // '${address?.addressLine1}, ${address?.addressLine2}, ${address?.city}, ${address?.state} - ${address?.zipCode}';
+}
+
+String getOTPCode() {
+  return (Random().nextInt(900000) + 100000).toString();
+}
+
+bool isValidPhoneNumber(String number) {
+  if (number.length != 10) return false;
+  try {
+    int.parse(number);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+bool isValidZipcode(String number) {
+  if (number.length != 6) return false;
+  try {
+    int.parse(number);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+bool isValidSerialNumber(String number) {
+  if (number.length != 6) return false;
+  try {
+    int.parse(number);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }
