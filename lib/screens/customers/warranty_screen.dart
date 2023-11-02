@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:saur_dealer/screens/customers/warranty_pdf.dart';
+import 'package:saur_dealer/screens/raise_warranty_request/new_customer.dart';
 import 'package:saur_dealer/screens/request/new_request_sreen.dart';
 import 'package:saur_dealer/utils/colors.dart';
 import 'package:saur_dealer/utils/date_time_formatter.dart';
@@ -234,7 +235,7 @@ class _WarrentyScreenState extends State<WarrentyScreen> {
           verticalGap(defaultPadding),
           ElevatedButton(
             onPressed: () {
-              Navigator.pushNamed(context, NewRequestScreen.routePath);
+              Navigator.pushNamed(context, NewCustomerScreen.routePath);
             },
             child: Text(
               'Get your warranty',

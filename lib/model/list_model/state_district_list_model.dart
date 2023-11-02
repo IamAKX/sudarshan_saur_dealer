@@ -20,7 +20,7 @@ class StateDistrictListModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'states': states?.map((x) => x?.toMap())?.toList(),
+      'states': states?.map((x) => x.toMap()).toList(),
     };
   }
 

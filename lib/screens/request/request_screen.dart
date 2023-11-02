@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:saur_dealer/main.dart';
+import 'package:saur_dealer/screens/raise_warranty_request/installation_address_screen.dart';
 import 'package:saur_dealer/screens/request/new_request_sreen.dart';
 import 'package:saur_dealer/screens/request/warranty_detail.dart';
 import 'package:saur_dealer/utils/date_time_formatter.dart';
@@ -14,6 +16,7 @@ import '../../utils/colors.dart';
 import '../../utils/preference_key.dart';
 import '../../utils/theme.dart';
 import '../../widgets/gaps.dart';
+import '../raise_warranty_request/new_customer.dart';
 
 class RequestScreen extends StatefulWidget {
   const RequestScreen({
@@ -55,14 +58,33 @@ class _RequestScreenState extends State<RequestScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Warranty Request',
+          'Guarantee Request',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
+        actions: [
+          Visibility(
+            visible: prefs.containsKey(SharedpreferenceKey.newCustId),
+            child: IconButton(
+              onPressed: () {
+                prefs.remove(SharedpreferenceKey.newCustId);
+                prefs.remove(SharedpreferenceKey.newCustPhone);
+                prefs.remove(SharedpreferenceKey.newCustSerial);
+                prefs.remove(SharedpreferenceKey.ongoingRequest);
+                setState(() {});
+              },
+              icon: Icon(Icons.auto_delete_outlined),
+            ),
+          )
+        ],
       ),
       body: getBody(context),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, NewRequestScreen.routePath);
+          if (prefs.containsKey(SharedpreferenceKey.newCustPhone)) {
+            Navigator.pushNamed(context, InstallationAddressScreen.routePath);
+          } else {
+            Navigator.pushNamed(context, NewCustomerScreen.routePath);
+          }
         },
         shape: const CircleBorder(),
         backgroundColor: Colors.white,
@@ -86,9 +108,9 @@ class _RequestScreenState extends State<RequestScreen> {
                     vertical: defaultPadding / 2, horizontal: defaultPadding),
                 textColor: textColorDark,
                 collapsedBackgroundColor: Colors.white,
-                backgroundColor: getColorByStatus(
-                        list?.data?.elementAt(index).allocationStatus ?? '')
-                    .withOpacity(0.1),
+                backgroundColor:
+                    getColorByStatus(list?.data?.elementAt(index).status ?? '')
+                        .withOpacity(0.1),
                 title: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -97,7 +119,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           BorderRadius.circular(settingsPageUserIconSize),
                       child: (list?.data
                                   ?.elementAt(index)
-                                  .customer
+                                  .customers
                                   ?.image
                                   ?.isEmpty ??
                               true)
@@ -110,7 +132,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           : CachedNetworkImage(
                               imageUrl: list?.data
                                       ?.elementAt(index)
-                                      .customer
+                                      .customers
                                       ?.image ??
                                   '',
                               fit: BoxFit.cover,
@@ -130,7 +152,10 @@ class _RequestScreenState extends State<RequestScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          list?.data?.elementAt(index).customer?.customerName ??
+                          list?.data
+                                  ?.elementAt(index)
+                                  .customers
+                                  ?.customerName ??
                               '',
                           style:
                               Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -138,7 +163,11 @@ class _RequestScreenState extends State<RequestScreen> {
                                   ),
                         ),
                         Text(
-                          list?.data?.elementAt(index).warrantySerialNo ?? '',
+                          list?.data
+                                  ?.elementAt(index)
+                                  .warrantyDetails
+                                  ?.warrantySerialNo ??
+                              '',
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     color: textColorDark,
@@ -151,27 +180,26 @@ class _RequestScreenState extends State<RequestScreen> {
                 subtitle: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      DateTimeFormatter.timesAgo(
-                          list?.data?.elementAt(index).createdOn ?? ''),
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: hintColor,
-                          ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: defaultPadding / 2),
-                      width: 3,
-                      height: defaultPadding * 0.75,
-                      color: dividerColor,
-                    ),
+                    // Text(
+                    //   DateTimeFormatter.timesAgo(
+                    //       list?.data?.elementAt(index).createdOn ?? ''),
+                    //   style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    //         color: hintColor,
+                    //       ),
+                    // ),
+                    // Container(
+                    //   margin: const EdgeInsets.symmetric(
+                    //       horizontal: defaultPadding / 2),
+                    //   width: 3,
+                    //   height: defaultPadding * 0.75,
+                    //   color: dividerColor,
+                    // ),
                     Text(
                       getShortMessageByStatus(
-                          list?.data?.elementAt(index).allocationStatus ?? ''),
+                          list?.data?.elementAt(index).status ?? ''),
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: getColorByStatus(
-                                list?.data?.elementAt(index).allocationStatus ??
-                                    ''),
+                                list?.data?.elementAt(index).status ?? ''),
                           ),
                     ),
                   ],
@@ -180,7 +208,7 @@ class _RequestScreenState extends State<RequestScreen> {
                   Container(
                     width: double.maxFinite,
                     color: getColorByStatus(
-                        list?.data?.elementAt(index).allocationStatus ?? ''),
+                        list?.data?.elementAt(index).status ?? ''),
                     child: Row(
                       children: [
                         Expanded(
@@ -191,10 +219,8 @@ class _RequestScreenState extends State<RequestScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(defaultPadding / 2),
                               child: Text(
-                                getDetailedMessageByStatus(list?.data
-                                        ?.elementAt(index)
-                                        .allocationStatus ??
-                                    ''),
+                                getDetailedMessageByStatus(
+                                    list?.data?.elementAt(index).status ?? ''),
                               ),
                             ),
                           ),

@@ -33,12 +33,12 @@ class _HomeContainerState extends State<HomeContainer> {
         items: [
           FlashyTabBarItem(
             icon: const Icon(
-              Icons.group_outlined,
+              Icons.playlist_add_check_circle_outlined,
             ),
-            title: const Text('Customers'),
+            title: const Text('Allocated'),
           ),
           FlashyTabBarItem(
-            icon: const Icon(Icons.history),
+            icon: const Icon(Icons.add_task_rounded),
             title: const Text('Request'),
           ),
           FlashyTabBarItem(

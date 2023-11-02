@@ -1,16 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:saur_dealer/screens/blocked_user/blocked_users_screen.dart';
+import 'package:saur_dealer/screens/raise_warranty_request/new_customer.dart';
 import 'package:saur_dealer/screens/request/new_request_sreen.dart';
 import 'package:saur_dealer/screens/request/warranty_detail.dart';
 
+import '../model/allocated_model.dart';
 import '../model/warranty_model.dart';
+import '../model/warranty_request_model.dart';
 import '../screens/app_intro/app_intro_screen.dart';
+import '../screens/customers/dealer_detail.dart';
 import '../screens/customers/warranty_screen.dart';
 import '../screens/home_container/home_container.dart';
 import '../screens/password_recovery/recover_password_screen.dart';
 import '../screens/profile/change_password.dart';
 import '../screens/profile/edit_profile.dart';
+import '../screens/raise_warranty_request/conclusion_screen.dart';
+import '../screens/raise_warranty_request/installation_address_screen.dart';
+import '../screens/raise_warranty_request/other_information_screen.dart';
+import '../screens/raise_warranty_request/owner_address_screen.dart';
+import '../screens/raise_warranty_request/photo_upload_screen.dart';
+import '../screens/raise_warranty_request/system_details_screen.dart';
 import '../screens/user_onboarding/address_screen.dart';
 import '../screens/user_onboarding/agreement_screen.dart';
 import '../screens/user_onboarding/business_detail.dart';
@@ -33,13 +43,50 @@ class NavRoute {
         return MaterialPageRoute(builder: (_) => const RecoverPasswordScreen());
       case HomeContainer.routePath:
         return MaterialPageRoute(builder: (_) => const HomeContainer());
-      case NewRequestScreen.routePath:
-        return MaterialPageRoute(builder: (_) => const NewRequestScreen());
+      case NewCustomerScreen.routePath:
+        return MaterialPageRoute(builder: (_) => const NewCustomerScreen());
+      case InstallationAddressScreen.routePath:
+        return MaterialPageRoute(
+            builder: (_) => const InstallationAddressScreen());
+
+      case OwnerAddressScreen.routePath:
+        return MaterialPageRoute(
+          builder: (_) => OwnerAddressScreen(
+            warrantyRequestModel: settings.arguments as WarrantyRequestModel,
+          ),
+        );
+      case SystemDetailScreen.routePath:
+        return MaterialPageRoute(
+          builder: (_) => SystemDetailScreen(
+            warrantyRequestModel: settings.arguments as WarrantyRequestModel,
+          ),
+        );
+      case OtherInformationScreen.routePath:
+        return MaterialPageRoute(
+          builder: (_) => OtherInformationScreen(
+            warrantyRequestModel: settings.arguments as WarrantyRequestModel,
+          ),
+        );
+      case PhotoUploadScreen.routePath:
+        return MaterialPageRoute(
+          builder: (_) => PhotoUploadScreen(
+            warrantyRequestModel: settings.arguments as WarrantyRequestModel,
+          ),
+        );
+      case ConclusionScreen.routePath:
+        return MaterialPageRoute(
+          builder: (_) => const ConclusionScreen(),
+        );
+
       case EditProfile.routePath:
         return MaterialPageRoute(builder: (_) => const EditProfile());
       case ChangePassword.routePath:
         return MaterialPageRoute(builder: (_) => const ChangePassword());
-
+      case DealerDetail.routePath:
+        return MaterialPageRoute(
+            builder: (_) => DealerDetail(
+                  data: settings.arguments as AllocatedModel,
+                ));
       case AddressScreen.routePath:
         return MaterialPageRoute(builder: (_) => const AddressScreen());
       case BusinessDetails.routePath:

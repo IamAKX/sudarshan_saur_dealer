@@ -8,12 +8,15 @@ import 'package:saur_dealer/screens/customers/warranty_screen.dart';
 import 'package:saur_dealer/utils/colors.dart';
 import 'package:saur_dealer/utils/enum.dart';
 
+import '../../model/allocated_model.dart';
+import '../../model/list_model/allocated_list.dart';
 import '../../model/list_model/warranty_request_list.dart';
 import '../../services/api_service.dart';
 import '../../services/snakbar_service.dart';
 import '../../utils/preference_key.dart';
 import '../../utils/theme.dart';
 import '../../widgets/gaps.dart';
+import 'dealer_detail.dart';
 
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key, required this.switchTabs});
@@ -25,7 +28,7 @@ class CustomersScreen extends StatefulWidget {
 
 class _CustomersScreenState extends State<CustomersScreen> {
   late ApiProvider _api;
-  WarrantyRequestList? list;
+  AllocatedList? list;
 
   @override
   void initState() {
@@ -37,12 +40,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   reloadScreen() async {
     await _api
-        .getWarrantyRequestListByDealerId(SharedpreferenceKey.getUserId())
+        .getAllocatedWarrantyList(SharedpreferenceKey.getUserId())
         .then((value) {
       setState(() {
         list = value;
-        list?.data?.retainWhere((element) =>
-            element.allocationStatus == AllocationStatus.APPROVED.name);
       });
     });
   }
@@ -60,13 +61,13 @@ class _CustomersScreenState extends State<CustomersScreen> {
         onChanged: (value) {},
         appBarBuilder: (context) => AppBar(
           title: Text(
-            'Customers',
+            'Allocated',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           actions: const [
-            AppBarSearchButton(
-              buttonHasTwoStates: false,
-            )
+            // AppBarSearchButton(
+            //   buttonHasTwoStates: false,
+            // )
           ],
         ),
       ),
@@ -75,19 +76,21 @@ class _CustomersScreenState extends State<CustomersScreen> {
   }
 
   getBody(BuildContext context) {
+    if (_api.status == ApiStatus.loading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return list?.data?.isNotEmpty ?? false
         ? ListView.separated(
-            itemBuilder: (context, index) => ListTile(
-                  tileColor: Colors.white,
-                  leading: ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(settingsPageUserIconSize),
-                    child: (list?.data
-                                ?.elementAt(index)
-                                .customer
-                                ?.image
-                                ?.isEmpty ??
-                            true)
+            itemBuilder: (context, index) {
+              AllocatedModel? item = list?.data?.elementAt(index);
+              return ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(settingsPageUserIconSize),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(110),
+                    child: (item?.stockists?.image?.isEmpty ?? true)
                         ? Image.asset(
                             'assets/images/profile_image_placeholder.png',
                             height: 40,
@@ -95,9 +98,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             fit: BoxFit.cover,
                           )
                         : CachedNetworkImage(
-                            imageUrl:
-                                list?.data?.elementAt(index).customer?.image ??
-                                    '',
+                            imageUrl: item?.stockists?.image ?? '',
                             fit: BoxFit.cover,
                             width: 40,
                             height: 40,
@@ -110,44 +111,48 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             ),
                           ),
                   ),
-                  title: Text(
-                    '${list?.data?.elementAt(index).customer?.customerName}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: textColorDark,
-                        ),
-                  ),
-                  subtitle: Text(
-                    '${list?.data?.elementAt(index).warrantySerialNo}',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: textColorDark,
-                        ),
-                  ),
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    WarrentyScreen.routePath,
-                    arguments: list?.data?.elementAt(index),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          LineAwesomeIcons.what_s_app,
-                          color: Colors.green,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.chevron_right,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
+                title: Text(
+                  '${item?.warrantySerialNo}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                subtitle: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${item?.stockists?.stockistName ?? ''}',
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      color: dividerColor,
+                      width: 1,
+                      height: 15,
+                    ),
+                    Text(
+                      item?.warrantyRequests?.status ??
+                          AllocationStatus.ALLOCATED.name,
+                      style: TextStyle(
+                          color: getColorByStatus(
+                              item?.warrantyRequests?.status ??
+                                  AllocationStatus.ALLOCATED.name)),
+                    ),
+                  ],
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: hintColor,
+                ),
+                onTap: () => Navigator.pushNamed(
+                        context, DealerDetail.routePath,
+                        arguments: list?.data?.elementAt(index))
+                    .then((value) => reloadScreen()),
+              );
+            },
             separatorBuilder: (context, index) => const Divider(
                   color: dividerColor,
+                  indent: defaultPadding * 5,
                 ),
             itemCount: list?.data?.length ?? 0)
         : noWarrantyCardWidget(context);
@@ -167,7 +172,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
               child: Text(
-                'No customer with warranty found',
+                'No serial number allocated',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: hintColor,
                     ),
@@ -175,17 +180,17 @@ class _CustomersScreenState extends State<CustomersScreen> {
             ),
           ),
           verticalGap(defaultPadding),
-          ElevatedButton(
-            onPressed: () {
-              widget.switchTabs(1);
-            },
-            child: Text(
-              'Raise warranty request',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Colors.white,
-                  ),
-            ),
-          )
+          // ElevatedButton(
+          //   onPressed: () {
+          //     widget.switchTabs(1);
+          //   },
+          //   child: Text(
+          //     'Raise warranty request',
+          //     style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          //           color: Colors.white,
+          //         ),
+          //   ),
+          // )
         ],
       ),
     );

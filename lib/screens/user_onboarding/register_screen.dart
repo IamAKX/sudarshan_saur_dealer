@@ -1,24 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:saur_dealer/screens/user_onboarding/business_detail.dart';
-import 'package:saur_dealer/screens/user_onboarding/otp_verification.dart';
-import 'package:saur_dealer/screens/user_onboarding/user_detail.dart';
 import 'package:saur_dealer/utils/theme.dart';
 import 'package:saur_dealer/widgets/gaps.dart';
 import 'package:saur_dealer/widgets/primary_button.dart';
 import 'package:string_validator/string_validator.dart';
 
-import '../../model/address_model.dart';
 import '../../model/user_model.dart';
 import '../../services/api_service.dart';
 import '../../services/snakbar_service.dart';
 import '../../utils/colors.dart';
-import '../../utils/date_time_formatter.dart';
 import '../../utils/enum.dart';
 import '../../utils/helper_method.dart';
 import '../../widgets/input_field_dark.dart';

@@ -20,7 +20,7 @@ class DealerListModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'data': data?.map((x) => x?.toMap())?.toList(),
+      'data': data?.map((x) => x.toMap()).toList(),
     };
   }
 

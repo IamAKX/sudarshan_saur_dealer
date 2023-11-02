@@ -336,24 +336,24 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                   "approvedBy": ""
                 };
 
-                _api.createNewWarrantyRequest(reqBody).then((value) {
-                  if (value) {
-                    _nameCtrl.text = '';
-                    _phoneCtrl.text = '';
-                    _emailCtrl.text = '';
-                    _addressCtrl.text = '';
-                    addressLine1Ctrl.text = '';
-                    addressLine2Ctrl.text = '';
-                    cityCtrl.text = '';
-                    stateCtrl.text = '';
-                    zipCodeCtrl.text = '';
-                    _timerActive = false;
-                    _showOTPField = false;
-                    _isOtpValidated = false;
-                    showPopup(context, DialogType.success, 'Done!',
-                        'We have received your request. You will hear from us in 24 hours');
-                  }
-                });
+                // _api.createNewWarrantyRequest(reqBody).then((value) {
+                //   if (value) {
+                //     _nameCtrl.text = '';
+                //     _phoneCtrl.text = '';
+                //     _emailCtrl.text = '';
+                //     _addressCtrl.text = '';
+                //     addressLine1Ctrl.text = '';
+                //     addressLine2Ctrl.text = '';
+                //     cityCtrl.text = '';
+                //     stateCtrl.text = '';
+                //     zipCodeCtrl.text = '';
+                //     _timerActive = false;
+                //     _showOTPField = false;
+                //     _isOtpValidated = false;
+                //     showPopup(context, DialogType.success, 'Done!',
+                //         'We have received your request. You will hear from us in 24 hours');
+                //   }
+                // });
               },
               label: 'Raise Request',
               isDisabled: _api.status == ApiStatus.loading,

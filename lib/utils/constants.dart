@@ -885,4 +885,36 @@ class Constants {
       }
     ]
   };
+
+  static List<String> option1 = ['Yes', 'No'];
+  static List<String> option2 = ['Bathing', 'Other'];
+  static List<String> option3 = ['Corporation', 'Boar well', 'River', 'Other'];
+  static List<String> option4 = ['Bucket', 'Shower', 'Pressurized'];
+  static List<String> option5 = ['Morning', 'Evening', '24 Hours'];
+  static List<String> option7 = ['Full', 'Part'];
+  static List<String> option8 = ['Yes', 'No', 'Partly'];
+
+  static String conclusionMessage = '''Dear Customer
+Congratulations on your new Solar water heating system,
+
+On behalf of Sudarshan Saur Shakti Pvt.Ltd., we would like to extend our heartfelt gratitude for choosing our solar water heating system. Your decision to trust our brand and invest in sustainable energy solutions means a lot to us.
+
+By purchasing our solar water heater, you have not only taken a significant step towards reducing your carbon footprint but have also contributed to the UNFCCC's carbon credit program. Your support in this initiative is commendable, as it directly aids in mitigating global warming and promoting a cleaner environment for future generations.
+
+At Sudarshan Saur Shakti Pvt.Ltd., we are dedicated to environmental stewardship, sustainable development goals and your purchase plays a vital role in supporting our commitment to the carbon credit program. The carbon credits earned through this program allow us to reinvest in research and development, enabling us to provide even better and more innovative products in the future.
+
+Once again, we thank you for your environmentally conscious decision and for being part of our efforts to create a sustainable future. If you have any questions or need assistance with your solar water heater, please don't hesitate to contact our customer support team.
+
+Thank you for being an eco-conscious customer and supporting our mission!
+Best regards
+''';
+
+  static String termsAndConditions = '''
+ In part consideration for the Solar Water Heater(s), I, the customer agree to irrevocably and unconditionally transfer to M/s. Sudarshan Saur Shakti Pvt. Ltd., full legal and beneficial title to all & any rights relating to the reduction of Green House Gas emissions & environmental benefits arising from the installation & use of solar water heating system(s) including Voluntary Emission Reductions (VERs) under the Kyoto Protocol & Paris Agreement. I agree to provide M/s. Sudarshan Saur Shakti Pvt. Ltd., any necessary assistance to bring such rights into existence''';
+
+  static String guaranteeCardMsg =
+      '''"in part consideration for the Solar Water Heater(s), I, the customer agree to irrevocably and unconditionally transfer to M/s. Sudarshan Saur Shakti Pvt Ltd., full legal and beneficial title to all & any rights relating to the reduction of Green House Gas emissions & environmental benefits arising from the installation & use of solar water heating system(s) including Voluntary Emission Reductions (VERs) under the Kyoto Protocol & Paris Agreement. I agree to provide M/s. Sudarshan Saur Shakti Pvt Ltd., any necessary assistance to bring such rights into existence"''';
+
+  static String manual_link =
+      'https://firebasestorage.googleapis.com/v0/b/sudarshan-saur.appspot.com/o/user_manual%2FETC%20Manual%20All%2019-10-2023.pdf?alt=media&token=edd44dd6-04a4-474b-800e-d9588eeb2e14&_gl=1*1upqfum*_ga*MjMxMzQ5MTY5LjE2ODQ2NjIyNjA.*_ga_CW55HF8NVT*MTY5NzczNzI2Ni4xMjkuMS4xNjk3NzM3MzQwLjYwLjAuMA..';
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:saur_dealer/screens/app_intro/app_intro_screen.dart';
@@ -5,6 +6,7 @@ import 'package:saur_dealer/utils/router.dart';
 import 'package:saur_dealer/utils/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'firebase_options.dart';
 import 'model/user_model.dart';
 import 'screens/blocked_user/blocked_users_screen.dart';
 import 'screens/home_container/home_container.dart';
@@ -28,6 +30,9 @@ Future<void> main() async {
           {'lastLogin': DateTimeFormatter.now()}, userModel?.dealerId ?? 0);
     }
   }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 

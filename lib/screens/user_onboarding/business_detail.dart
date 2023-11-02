@@ -6,6 +6,7 @@ import '../../main.dart';
 import '../../model/user_model.dart';
 import '../../services/api_service.dart';
 import '../../services/snakbar_service.dart';
+import '../../utils/constants.dart';
 import '../../utils/preference_key.dart';
 import '../../utils/theme.dart';
 import '../../widgets/gaps.dart';
@@ -23,7 +24,7 @@ class BusinessDetails extends StatefulWidget {
 class _BusinessDetailsState extends State<BusinessDetails> {
   late ApiProvider _api;
   UserModel? user;
-
+  bool agreement = false;
   final TextEditingController _gstCtrl = TextEditingController();
   final TextEditingController _businessNameCtrl = TextEditingController();
 
@@ -95,7 +96,13 @@ class _BusinessDetailsState extends State<BusinessDetails> {
           keyboardType: TextInputType.text,
           obscure: false,
           icon: LineAwesomeIcons.store),
-      verticalGap(defaultPadding / 2),
+      verticalGap(defaultPadding * 1.5),
+      TextButton(
+        onPressed: () {
+          showPrivacyDialogbox(context);
+        },
+        child: Text('Read Terms and Conditions'),
+      ),
     ]);
   }
 
@@ -109,6 +116,69 @@ class _BusinessDetailsState extends State<BusinessDetails> {
           .showSnackBarError('Business Name cannot be empty');
       return false;
     }
+    if (!agreement) {
+      SnackBarService.instance
+          .showSnackBarError('Please accept terms and conditions');
+      return false;
+    }
     return true;
+  }
+
+  showPrivacyDialogbox(BuildContext context) {
+    // set up the button
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Terms and Conditions"),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Text(Constants.termsAndConditions),
+                    verticalGap(defaultPadding),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: agreement,
+                          onChanged: (value) {
+                            setState(() {
+                              agreement = value ?? false;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: Text(
+                            'I/we read and agreed and accepted the above terms and conditions',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              actions: [
+                okButton,
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }
