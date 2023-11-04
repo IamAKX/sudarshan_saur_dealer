@@ -64,11 +64,13 @@ class _BusinessDetailsState extends State<BusinessDetails> {
                 _api.updateUser({
                   'businessName': _businessNameCtrl.text,
                   'gstNumber': _gstCtrl.text,
-                }, user?.dealerId ?? -1).then((value) {
+                }, user?.dealerId ?? -1).then((value) async {
                   if (value) {
                     SnackBarService.instance.showSnackBarSuccess(
                         'Registration complete. Please login');
                     prefs.clear();
+                    // await _api.sendAgreement(user?.mobileNo ?? '', 'dealer',
+                    //     user?.dealerId.toString() ?? '');
                     Navigator.pushNamedAndRemoveUntil(
                         context, LoginScreen.routePath, (route) => false);
                   }

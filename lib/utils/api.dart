@@ -19,4 +19,9 @@ class Api {
   static String buildOtpUrl(String phone, String otp) {
     return 'https://sms.voicesoft.in/vb/apikey.php?apikey=UaOLHBZP2GxUy3ZN&senderid=SSSPLM&number=$phone&unicode=2&message=Your%20OTP%20for%20phone%20verification%20on%20Sudarshan%20Saur%20Application%20is%20$otp';
   }
+
+
+  static String buildAgreementUrl(String phone, String usertype, String id) {
+    return 'https://sms.voicesoft.in/vb/apikey.php?apikey=UaOLHBZP2GxUy3ZN&senderid=SSSPLM&number=$phone&unicode=2&message=Welcome%20to%20Sudarshan%20Saur.%20Please%20download%20the%20agreement%20from%20%3A%20https%3A%2F%2F13.51.238.100%3A8084%2Fsudarshansaur%2Fagreement%2F$usertype%2F$id';
+  }
 }

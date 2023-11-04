@@ -720,4 +720,40 @@ class ApiProvider extends ChangeNotifier {
     notifyListeners();
     return false;
   }
+
+
+  // Future<bool> sendAgreement(String phone, String userType, String id) async {
+  //   status = ApiStatus.loading;
+  //   notifyListeners();
+  //   try {
+  //     debugPrint(Api.buildAgreementUrl(phone, userType, id));
+  //     Response response = await _dio.get(
+  //       Api.buildAgreementUrl(phone, userType, id),
+  //       options: Options(
+  //         contentType: 'application/json',
+  //         responseType: ResponseType.json,
+  //       ),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       status = ApiStatus.success;
+  //       notifyListeners();
+  //       return true;
+  //     }
+  //   } on DioException catch (e) {
+  //     status = ApiStatus.failed;
+  //     var resBody = e.response?.data ?? {};
+  //     log(e.response?.data.toString() ?? e.response.toString());
+  //     notifyListeners();
+  //     SnackBarService.instance
+  //         .showSnackBarError('Error : ${resBody['message']}');
+  //   } catch (e) {
+  //     status = ApiStatus.failed;
+  //     notifyListeners();
+  //     SnackBarService.instance.showSnackBarError(e.toString());
+  //     log(e.toString());
+  //   }
+  //   status = ApiStatus.failed;
+  //   notifyListeners();
+  //   return false;
+  // }
 }
