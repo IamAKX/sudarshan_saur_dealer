@@ -104,7 +104,7 @@ class NavRoute {
       case WarrantyDetailScreen.routePath:
         return MaterialPageRoute(
             builder: (_) => WarrantyDetailScreen(
-                  warrantyRequest: settings.arguments as WarrantyModel,
+                  warrantyRequest: settings.arguments as WarrantyRequestModel,
                 ));
 
       default:
