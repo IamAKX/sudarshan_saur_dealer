@@ -78,22 +78,22 @@ class _RequestScreenState extends State<RequestScreen> {
         ],
       ),
       body: getBody(context),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (prefs.containsKey(SharedpreferenceKey.newCustPhone)) {
-            Navigator.pushNamed(context, InstallationAddressScreen.routePath);
-          } else {
-            Navigator.pushNamed(context, NewCustomerScreen.routePath);
-          }
-        },
-        shape: const CircleBorder(),
-        backgroundColor: Colors.white,
-        child: const Icon(
-          Icons.add,
-          color: primaryColor,
-          size: 35,
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     if (prefs.containsKey(SharedpreferenceKey.newCustPhone)) {
+      //       Navigator.pushNamed(context, InstallationAddressScreen.routePath);
+      //     } else {
+      //       Navigator.pushNamed(context, NewCustomerScreen.routePath);
+      //     }
+      //   },
+      //   shape: const CircleBorder(),
+      //   backgroundColor: Colors.white,
+      //   child: const Icon(
+      //     Icons.add,
+      //     color: primaryColor,
+      //     size: 35,
+      //   ),
+      // ),
     );
   }
 
